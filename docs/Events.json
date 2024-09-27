@@ -1,0 +1,113 @@
+{
+    "info": {
+      "name": "Intranet Project API Documentation",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "version": "1.0.0",
+      "description": "API documentation for managing events, including upcoming events, past events, and event registration."
+    },
+    "item": [
+      {
+        "name": "Events",
+        "description": "APIs related to events management, including upcoming events, past events, and event registration.",
+        "item": [
+          {
+            "name": "Get Upcoming Events",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/events/upcoming",
+              "description": "Retrieve a list of upcoming events.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Upcoming Events Response",
+                "code": 200,
+                "body": "[\n  {\n    \"eventId\": \"event_001\",\n    \"title\": \"Team Building Workshop\",\n    \"date\": \"2024-10-05\",\n    \"location\": \"Conference Room A\"\n  },\n  {\n    \"eventId\": \"event_002\",\n    \"title\": \"Annual Company Retreat\",\n    \"date\": \"2024-11-15\",\n    \"location\": \"Mountain Resort\"\n  }\n]",
+                "description": "Successful response with a list of upcoming events."
+              },
+              {
+                "name": "No Upcoming Events Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No upcoming events found\"\n}",
+                "description": "Error response when no upcoming events are available."
+              }
+            ]
+          },
+          {
+            "name": "Get Past Events",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/events/past",
+              "description": "Retrieve a list of past events.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Past Events Response",
+                "code": 200,
+                "body": "[\n  {\n    \"eventId\": \"event_003\",\n    \"title\": \"Project Kickoff Meeting\",\n    \"date\": \"2024-09-10\",\n    \"location\": \"Zoom\"\n  },\n  {\n    \"eventId\": \"event_004\",\n    \"title\": \"Quarterly Review\",\n    \"date\": \"2024-08-25\",\n    \"location\": \"Main Hall\"\n  }\n]",
+                "description": "Successful response with a list of past events."
+              },
+              {
+                "name": "No Past Events Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No past events found\"\n}",
+                "description": "Error response when no past events are available."
+              }
+            ]
+          },
+          {
+            "name": "Register for an Event",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/events/register",
+              "description": "Register an employee for an event.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "Content type of the request body."
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"eventId\": \"event_001\",\n  \"employeeId\": \"emp_001\"\n}"
+              }
+            },
+            "response": [
+              {
+                "name": "Registration Success Response",
+                "code": 200,
+                "body": "{\n  \"message\": \"Registration successful\"\n}",
+                "description": "Successful response confirming the registration for the event."
+              },
+              {
+                "name": "Error in Registration Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"Event not found or registration failed\"\n}",
+                "description": "Error response when the specified event does not exist or registration fails."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

@@ -1,0 +1,208 @@
+{
+  "info": {
+    "name": "Intranet Project API Documentation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0",
+    "description": "API documentation for managing announcements, including social media integration for likes and comments."
+  },
+  "item": [
+    {
+      "name": "Announcements",
+      "description": "APIs related to announcements.",
+      "item": [
+        {
+          "name": "Get Latest Announcements",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/announcements",
+            "description": "Retrieve a list of the latest announcements.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Latest Announcements Response",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": \"ann_001\",\n    \"title\": \"New Product Launch\",\n    \"brief\": \"A new product has been launched.\",\n    \"date\": \"2024-09-20T10:00:00Z\"\n  },\n  {\n    \"id\": \"ann_002\",\n    \"title\": \"Company Policy Update\",\n    \"brief\": \"New policies regarding work from home.\",\n    \"date\": \"2024-09-21T09:00:00Z\"\n  }\n]",
+              "description": "Successfully retrieved the latest announcements."
+            },
+            {
+              "name": "No Announcements Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"No announcements found\"\n}",
+              "description": "Error response indicating no announcements were found."
+            }
+          ]
+        },
+        {
+          "name": "Get Announcement Brief",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/announcements/{{id}}/brief",
+            "description": "Retrieve a brief overview of a specific announcement by ID.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Announcement Brief Response",
+              "code": 200,
+              "body": "{\n  \"id\": \"ann_001\",\n  \"brief\": \"A new product has been launched.\"\n}",
+              "description": "Successfully retrieved a brief overview of the announcement."
+            },
+            {
+              "name": "Announcement Not Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"Announcement not found\"\n}",
+              "description": "Error response indicating the specified announcement was not found."
+            }
+          ]
+        },
+        {
+          "name": "Get Announcement Details",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/announcements/{{id}}",
+            "description": "Retrieve detailed information of a specific announcement by ID.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Announcement Details Response",
+              "code": 200,
+              "body": "{\n  \"id\": \"ann_001\",\n  \"title\": \"New Product Launch\",\n  \"details\": \"We are excited to announce the launch of our new product, which is designed to...\",\n  \"date\": \"2024-09-20T10:00:00Z\",\n  \"likes\": 42\n}",
+              "description": "Successfully retrieved detailed information about the announcement."
+            },
+            {
+              "name": "Announcement Not Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"Announcement not found\"\n}",
+              "description": "Error response indicating the specified announcement was not found."
+            }
+          ]
+        },
+        {
+          "name": "Like an Announcement",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/announcements/{{id}}/like",
+            "description": "Like a specific announcement by ID.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              }
+            ]
+          },
+          "response": [
+            {
+              "name": "Like Success Response",
+              "code": 200,
+              "body": "{\n  \"message\": \"Announcement liked successfully\"\n}",
+              "description": "Successfully liked the announcement."
+            },
+            {
+              "name": "Announcement Not Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"Announcement not found\"\n}",
+              "description": "Error response indicating the specified announcement was not found."
+            }
+          ]
+        },
+        {
+          "name": "Comment on Announcement",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/announcements/{{id}}/comments",
+            "description": "Comment on a specific announcement by ID.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "Content type of the request body."
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"comment\": \"This is a great announcement!\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "Comment Success Response",
+              "code": 201,
+              "body": "{\n  \"message\": \"Comment added successfully\"\n}",
+              "description": "Successfully added the comment to the announcement."
+            },
+            {
+              "name": "Announcement Not Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"Announcement not found\"\n}",
+              "description": "Error response indicating the specified announcement was not found."
+            }
+          ]
+        },
+        {
+          "name": "Like and Comment on LinkedIn",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/announcements/{{id}}/linkedin",
+            "description": "Like and comment on the announcement via LinkedIn integration.",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "description": "Authorization token to access the API."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "Content type of the request body."
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"like\": true,\n  \"comment\": \"Excited about this announcement!\"\n}"
+            }
+          },
+          "response": [
+            {
+              "name": "LinkedIn Interaction Success Response",
+              "code": 200,
+              "body": "{\n  \"message\": \"LinkedIn like and comment posted successfully\"\n}",
+              "description": "Successfully posted like and comment to LinkedIn."
+            },
+            {
+              "name": "Announcement Not Found Response",
+              "code": 404,
+              "body": "{\n  \"error\": \"Announcement not found\"\n}",
+              "description": "Error response indicating the specified announcement was not found."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

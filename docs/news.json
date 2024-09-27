@@ -1,0 +1,200 @@
+{
+    "info": {
+      "name": "News API",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "version": "1.0.0",
+      "description": "API documentation for managing and viewing news articles."
+    },
+    "item": [
+      {
+        "name": "News",
+        "description": "APIs related to news articles.",
+        "item": [
+          {
+            "name": "Get Latest News",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/news",
+              "description": "Retrieve a list of the latest news articles.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Latest News Response",
+                "code": 200,
+                "body": "[\n  {\n    \"id\": \"news_001\",\n    \"title\": \"New Policy Update\",\n    \"brief\": \"A new company policy has been introduced.\",\n    \"date\": \"2024-09-21T09:00:00Z\"\n  },\n  {\n    \"id\": \"news_002\",\n    \"title\": \"Quarterly Financial Results\",\n    \"brief\": \"The financial results for Q3 have been published.\",\n    \"date\": \"2024-09-22T08:30:00Z\"\n  }\n]",
+                "description": "Successful response with a list of the latest news articles."
+              },
+              {
+                "name": "No News Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No news found\"\n}",
+                "description": "Error response when no news articles are found."
+              }
+            ]
+          },
+          {
+            "name": "Get News Brief",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/news/{{id}}/brief",
+              "description": "Retrieve a brief overview of a specific news article by ID.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "News Brief Response",
+                "code": 200,
+                "body": "{\n  \"id\": \"news_001\",\n  \"brief\": \"A new company policy has been introduced.\"\n}",
+                "description": "Successful response with a brief overview of the news article."
+              },
+              {
+                "name": "News Article Not Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"News article not found\"\n}",
+                "description": "Error response when the news article cannot be found."
+              }
+            ]
+          },
+          {
+            "name": "Get News Details",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/news/{{id}}",
+              "description": "Retrieve detailed information of a specific news article by ID.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "News Details Response",
+                "code": 200,
+                "body": "{\n  \"id\": \"news_001\",\n  \"title\": \"New Policy Update\",\n  \"details\": \"Details about the new policy introduced on...\",\n  \"date\": \"2024-09-21T09:00:00Z\",\n  \"likes\": 10\n}",
+                "description": "Successful response with detailed information about the news article."
+              },
+              {
+                "name": "News Article Not Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"News article not found\"\n}",
+                "description": "Error response when the news article cannot be found."
+              }
+            ]
+          },
+          {
+            "name": "Like a News Article",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/news/{{id}}/like",
+              "description": "Like a specific news article by ID.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Like Success Response",
+                "code": 200,
+                "body": "{\n  \"message\": \"News article liked successfully\"\n}",
+                "description": "Successful response confirming that the news article was liked."
+              },
+              {
+                "name": "News Article Not Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"News article not found\"\n}",
+                "description": "Error response when the news article cannot be found."
+              }
+            ]
+          },
+          {
+            "name": "Add Comment to News Article",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/news/{{id}}/comments",
+              "description": "Add a comment to a specific news article by ID.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "Content type of the request body."
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"comment\": \"This is a comment on the news article.\"\n}"
+              }
+            },
+            "response": [
+              {
+                "name": "Comment Success Response",
+                "code": 201,
+                "body": "{\n  \"message\": \"Comment added successfully\",\n  \"commentId\": \"comment_001\"\n}",
+                "description": "Successful response confirming the comment was added."
+              },
+              {
+                "name": "News Article Not Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"News article not found\"\n}",
+                "description": "Error response when the news article cannot be found."
+              }
+            ]
+          },
+          {
+            "name": "Get Comments for News Article",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/news/{{id}}/comments",
+              "description": "Retrieve all comments for a specific news article by ID.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Comments Response",
+                "code": 200,
+                "body": "[\n  {\n    \"commentId\": \"comment_001\",\n    \"comment\": \"This is a comment on the news article.\",\n    \"date\": \"2024-09-21T10:00:00Z\"\n  }\n]",
+                "description": "Successful response with a list of comments for the news article."
+              },
+              {
+                "name": "News Article Not Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"News article not found\"\n}",
+                "description": "Error response when the news article cannot be found."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

@@ -1,0 +1,165 @@
+const Announcement = require('../model/Announcement'); // Assuming the model file path is correct
+const mongoose = require('mongoose');
+
+// Get latest announcements
+const getLatestAnnouncements = async (req, res) => {
+  try {
+    const announcements = await Announcement.find().sort({ createdDate: -1 }).limit(10); // Fetch the latest 10 announcements
+    res.status(200).json({
+      success: true,
+      count: announcements.length,
+      data: announcements,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching latest announcements',
+      error: error.message,
+    });
+  }
+};
+
+// Get announcements with brief details (e.g., title and createdDate)
+const getAnnouncementsBrief = async (req, res) => {
+  try {
+    const announcements = await Announcement.find({}, 'title createdDate author').sort({ createdDate: -1 });
+    res.status(200).json({
+      success: true,
+      data: announcements,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching announcements',
+      error: error.message,
+    });
+  }
+};
+
+// Get announcement details by ID
+const getAnnouncementDetails = async (req, res) => {
+  try {
+    const announcementId = req.params.id;
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement ID',
+      });
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: announcement,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while fetching announcement details',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+// Edit an announcement
+const editAnnouncement = async (req, res) => {
+  try {
+    const announcementId = req.params.id;
+    const { title, content, tags } = req.body;
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement ID',
+      });
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    // Update the announcement fields
+    if (title) announcement.title = title;
+    if (content) announcement.content = content;
+    if (tags) announcement.tags = tags;
+
+    await announcement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Announcement updated successfully',
+      data: announcement,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while updating announcement',
+      error: error.message,
+    });
+  }
+};
+
+
+// Delete an announcement
+const deleteAnnouncement = async (req, res) => {
+  try {
+    const announcementId = req.params.id;
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement ID',
+      });
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    await announcement.remove();
+
+    res.status(200).json({
+      success: true,
+      message: 'Announcement deleted successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting announcement',
+      error: error.message,
+    });
+  }
+};
+
+module.exports = {
+  getLatestAnnouncements,
+  getAnnouncementsBrief,
+  getAnnouncementDetails,
+  editAnnouncement,  // Newly added
+  deleteAnnouncement,  // Newly added
+};

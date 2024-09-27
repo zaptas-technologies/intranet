@@ -1,0 +1,113 @@
+{
+    "info": {
+      "name": "Intranet Project API Documentation",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "version": "1.0.0",
+      "description": "API documentation for managing social media sharing and displaying posts."
+    },
+    "item": [
+      {
+        "name": "Social Media",
+        "description": "APIs related to social media sharing and displaying posts.",
+        "item": [
+          {
+            "name": "Share Announcement on Social Media",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/social-media/share",
+              "description": "Share an announcement or blog post on social media platforms like LinkedIn.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "Content type of the request body."
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"platform\": \"LinkedIn\",\n  \"content\": {\n    \"title\": \"New Product Launch\",\n    \"url\": \"{{baseUrl}}/announcements/ann_001\",\n    \"description\": \"Check out our new product launch!\"\n  }\n}"
+              }
+            },
+            "response": [
+              {
+                "name": "Share Success Response",
+                "code": 200,
+                "body": "{\n  \"message\": \"Announcement shared successfully on social media\"\n}",
+                "description": "Successfully shared the announcement on the specified social media platform."
+              },
+              {
+                "name": "Share Failure Response",
+                "code": 400,
+                "body": "{\n  \"error\": \"Unable to share on social media\"\n}",
+                "description": "Error response indicating a failure to share on social media."
+              }
+            ]
+          },
+          {
+            "name": "Get Shared Posts",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/social-media/shared-posts",
+              "description": "Retrieve a list of posts shared on social media.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Shared Posts Response",
+                "code": 200,
+                "body": "[\n  {\n    \"postId\": \"post_001\",\n    \"platform\": \"LinkedIn\",\n    \"content\": \"Excited to share our new product!\",\n    \"date\": \"2024-09-22T10:00:00Z\"\n  },\n  {\n    \"postId\": \"post_002\",\n    \"platform\": \"Twitter\",\n    \"content\": \"Check out our latest blog!\",\n    \"date\": \"2024-09-23T12:00:00Z\"\n  }\n]",
+                "description": "Successfully retrieved a list of shared posts."
+              },
+              {
+                "name": "No Shared Posts Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No shared posts found\"\n}",
+                "description": "Error response indicating no shared posts were found."
+              }
+            ]
+          },
+          {
+            "name": "Fetch Posts from Social Media",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/social-media/posts",
+              "description": "Retrieve a list of recent posts from connected social media platforms.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Social Media Posts Response",
+                "code": 200,
+                "body": "[\n  {\n    \"postId\": \"post_001\",\n    \"platform\": \"LinkedIn\",\n    \"content\": \"New features launched in our product!\",\n    \"author\": \"Company Name\",\n    \"date\": \"2024-09-23T14:00:00Z\"\n  },\n  {\n    \"postId\": \"post_002\",\n    \"platform\": \"Twitter\",\n    \"content\": \"Join our webinar this Friday!\",\n    \"author\": \"Company Name\",\n    \"date\": \"2024-09-23T13:00:00Z\"\n  }\n]",
+                "description": "Successfully retrieved recent posts from social media."
+              },
+              {
+                "name": "No Posts Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No posts found from social media\"\n}",
+                "description": "Error response indicating no posts were found from social media."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

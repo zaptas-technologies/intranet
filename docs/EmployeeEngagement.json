@@ -1,0 +1,200 @@
+{
+    "info": {
+      "name": "Intranet Project API Documentation",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "version": "1.0.0",
+      "description": "API documentation for managing employee engagement, including new joinees, birthdays, directory, rewards, policies, and quick links."
+    },
+    "item": [
+      {
+        "name": "Employee Engagement",
+        "description": "APIs related to employee engagement activities, including new joinees, birthday wishes, directory, rewards, and policies.",
+        "item": [
+          {
+            "name": "Get New Joinees and Birthday Wishes",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/employee/engagement/new-joinees",
+              "description": "Retrieve a list of new joinees and upcoming birthdays.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "New Joinees and Birthday Response",
+                "code": 200,
+                "body": "[\n  {\n    \"name\": \"John Doe\",\n    \"joiningDate\": \"2024-09-25\",\n    \"birthday\": \"1985-10-01\"\n  },\n  {\n    \"name\": \"Jane Smith\",\n    \"joiningDate\": \"2024-10-01\",\n    \"birthday\": \"1990-09-30\"\n  }\n]",
+                "description": "Successful response with a list of new joinees and their birthdays."
+              },
+              {
+                "name": "No New Joinees or Birthdays Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No new joinees or upcoming birthdays found\"\n}",
+                "description": "Error response when no new joinees or birthdays are available."
+              }
+            ]
+          },
+          {
+            "name": "Get Employee Directory",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/employee/directory",
+              "description": "Retrieve the employee directory for the organization.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Employee Directory Response",
+                "code": 200,
+                "body": "[\n  {\n    \"id\": \"emp_001\",\n    \"name\": \"John Doe\",\n    \"position\": \"Software Engineer\",\n    \"email\": \"john.doe@example.com\"\n  },\n  {\n    \"id\": \"emp_002\",\n    \"name\": \"Jane Smith\",\n    \"position\": \"Product Manager\",\n    \"email\": \"jane.smith@example.com\"\n  }\n]",
+                "description": "Successful response with a list of employees in the directory."
+              },
+              {
+                "name": "No Employees Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No employees found in the directory\"\n}",
+                "description": "Error response when no employees are available in the directory."
+              }
+            ]
+          },
+          {
+            "name": "Get Rewards and Recognition",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/employee/rewards",
+              "description": "Retrieve the list of rewards and recognitions for employees.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Rewards and Recognition Response",
+                "code": 200,
+                "body": "[\n  {\n    \"employeeId\": \"emp_001\",\n    \"reward\": \"Employee of the Month\",\n    \"date\": \"2024-09-01\"\n  },\n  {\n    \"employeeId\": \"emp_002\",\n    \"reward\": \"Best Team Player\",\n    \"date\": \"2024-09-15\"\n  }\n]",
+                "description": "Successful response with a list of rewards and recognitions."
+              },
+              {
+                "name": "No Rewards Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No rewards or recognitions found\"\n}",
+                "description": "Error response when no rewards or recognitions are available."
+              }
+            ]
+          },
+          {
+            "name": "Get Policies and Employee Communications",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/employee/policies",
+              "description": "Retrieve a list of company policies and employee communications.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Policies and Communications Response",
+                "code": 200,
+                "body": "[\n  {\n    \"title\": \"Work from Home Policy\",\n    \"description\": \"Guidelines for working remotely.\"\n  },\n  {\n    \"title\": \"Code of Conduct\",\n    \"description\": \"Expected behavior of employees.\"\n  }\n]",
+                "description": "Successful response with a list of policies and communications."
+              },
+              {
+                "name": "No Policies Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No policies or communications found\"\n}",
+                "description": "Error response when no policies or communications are available."
+              }
+            ]
+          },
+          {
+            "name": "Get Quick Links",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/employee/quick-links",
+              "description": "Retrieve quick links for employee resources.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Quick Links Response",
+                "code": 200,
+                "body": "[\n  {\n    \"title\": \"HR Portal\",\n    \"url\": \"https://example.com/hr\"\n  },\n  {\n    \"title\": \"Employee Benefits\",\n    \"url\": \"https://example.com/benefits\"\n  }\n]",
+                "description": "Successful response with a list of quick links."
+              },
+              {
+                "name": "No Quick Links Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No quick links found\"\n}",
+                "description": "Error response when no quick links are available."
+              }
+            ]
+          },
+          {
+            "name": "Send Birthday Wishes via Email",
+            "request": {
+              "method": "POST",
+              "url": "{{baseUrl}}/employee/birthday/wish",
+              "description": "Send birthday wishes via email to an employee.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json",
+                  "description": "Content type of the request body."
+                }
+              ],
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"employeeId\": \"emp_001\",\n  \"message\": \"Happy Birthday, John Doe! Wishing you a fantastic year ahead!\"\n}"
+              }
+            },
+            "response": [
+              {
+                "name": "Birthday Wishes Sent Response",
+                "code": 200,
+                "body": "{\n  \"message\": \"Birthday wishes sent successfully\"\n}",
+                "description": "Successful response confirming the birthday wishes were sent."
+              },
+              {
+                "name": "Error Sending Birthday Wishes Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"Employee not found\"\n}",
+                "description": "Error response when the specified employee ID does not exist."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

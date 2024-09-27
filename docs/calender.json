@@ -1,0 +1,75 @@
+{
+    "info": {
+      "name": "Intranet Project API Documentation",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "version": "1.0.0",
+      "description": "API documentation for managing calendars, including holiday and company events."
+    },
+    "item": [
+      {
+        "name": "Calendar",
+        "description": "APIs related to calendar events, including holidays and company events.",
+        "item": [
+          {
+            "name": "Get Holiday Calendar",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/calendar/holidays",
+              "description": "Retrieve the holiday calendar for the company.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Holiday Calendar Response",
+                "code": 200,
+                "body": "[\n  {\n    \"date\": \"2024-01-01\",\n    \"holiday\": \"New Year's Day\"\n  },\n  {\n    \"date\": \"2024-12-25\",\n    \"holiday\": \"Christmas Day\"\n  }\n]",
+                "description": "Successful response with a list of holidays."
+              },
+              {
+                "name": "No Holidays Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No holidays found\"\n}",
+                "description": "Error response when no holidays are available."
+              }
+            ]
+          },
+          {
+            "name": "Get Company Events Calendar",
+            "request": {
+              "method": "GET",
+              "url": "{{baseUrl}}/calendar/events",
+              "description": "Retrieve the company events calendar.",
+              "header": [
+                {
+                  "key": "Authorization",
+                  "value": "Bearer {{accessToken}}",
+                  "description": "Authorization token to access the API."
+                }
+              ]
+            },
+            "response": [
+              {
+                "name": "Company Events Calendar Response",
+                "code": 200,
+                "body": "[\n  {\n    \"date\": \"2024-03-15\",\n    \"event\": \"Annual Company Meeting\"\n  },\n  {\n    \"date\": \"2024-07-04\",\n    \"event\": \"Summer Team Building Retreat\"\n  }\n]",
+                "description": "Successful response with a list of company events."
+              },
+              {
+                "name": "No Events Found Response",
+                "code": 404,
+                "body": "{\n  \"error\": \"No events found\"\n}",
+                "description": "Error response when no events are available."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

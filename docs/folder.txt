@@ -1,0 +1,42 @@
+/intranet-app
+│
+├── /client                # React Frontend
+│   ├── /public            # Public assets like index.html, logos
+│   ├── /src
+│   │   ├── /components    # Reusable components like Header, Footer, etc.
+│   │   ├── /pages         # Pages for each route in the app (e.g., Home, Dashboard)
+│   │   ├── /services      # Frontend services for API calls
+│   │   ├── /utils         # Utility functions
+│   │   └── App.js         # Main React app entry
+│   └── package.json
+│
+├── /server                # Backend (Node.js + Express)
+│   ├── /config            # Configuration files (DB, environment variables)
+│   ├── /routes            # API routes for each module (e.g., /announcements, /news)
+│   ├── /models            # Mongoose schemas for MongoDB
+│   ├── /controllers       # Business logic and request handling
+│   ├── /middleware        # Middleware functions like authentication
+│   └── server.js          # Main Express server entry
+│
+├── /services              # Microservices directory
+│   ├── /announcements     # Microservice for Announcements module
+│   ├── /news              # Microservice for News module
+│   ├── /calendar          # Microservice for Calendar module
+│   ├── /engagement        # Microservice for Employee Engagement module
+│   ├── /events            # Microservice for Events module
+│   ├── /social-media      # Microservice for Social Media integration
+│   ├── /search            # Microservice for Search functionality
+│   ├── /knowledge-base    # Microservice for Knowledge Base
+│   └── /user-management   # Microservice for User Management
+│
+├── /database              # Database setup scripts
+│   └── /migrations        # DB migrations
+│
+├── /docs                  # Documentation (Requirements, Design mockups)
+│   ├── requirements.md    # Requirements document
+│   ├── design.md          # Design documentation
+│   └── api-specs.md       # API specifications
+│
+├── /tests                 # Unit and integration tests
+│
+└── README.md              # Project README file
