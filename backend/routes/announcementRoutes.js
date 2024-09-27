@@ -35,7 +35,7 @@ router.post('/:id/unlike', unlikeAnnouncement);
 router.post('/:id/comment', addCommentToAnnouncement);
 
 // PUT edit a comment
-router.put('/:id/comment/:commentId', editComment);
+router.put('/:id/edit-comment', editComment);
 
 // DELETE a comment
 router.delete('/:id/comment', deleteComment);
