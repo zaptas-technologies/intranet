@@ -235,7 +235,7 @@ const editComment = async (req, res) => {
   
 
   // Delete a comment
-const deleteComment = async (req, res) => {
+  const deleteComment = async (req, res) => {
     try {
       const announcementId = req.params.id;
       const { commentId, userId } = req.body;
@@ -274,14 +274,17 @@ const deleteComment = async (req, res) => {
         });
       }
   
+      // Store the deleted comment before removing
+      const deletedComment = commentToDelete.toObject(); // Convert to plain object before removing
+  
       // Remove the comment
-      commentToDelete.remove();
+      announcement.comments.pull(commentId); 
       await announcement.save();
   
       res.status(200).json({
         success: true,
         message: 'Comment deleted successfully',
-        comments: announcement.comments,
+        deletedComment, // Return only the deleted comment
       });
     } catch (error) {
       res.status(500).json({
@@ -291,6 +294,8 @@ const deleteComment = async (req, res) => {
       });
     }
   };
+  
+  
   
   
   module.exports = {

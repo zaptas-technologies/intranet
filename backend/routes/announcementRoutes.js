@@ -38,7 +38,7 @@ router.post('/:id/comment', addCommentToAnnouncement);
 router.put('/:id/comment/:commentId', editComment);
 
 // DELETE a comment
-router.delete('/:id/comment/:commentId', deleteComment);
+router.delete('/:id/comment', deleteComment);
 
 // PUT edit an announcement
 router.put('/:id', editAnnouncement);
