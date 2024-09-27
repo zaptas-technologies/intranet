@@ -1,4 +1,4 @@
-const Announcement = require('../model/Announcement'); // Assuming the model file path is correct
+const Announcement = require('../../model/Announcement'); // Assuming the model file path is correct
 const mongoose = require('mongoose');
 
 // Get latest announcements
