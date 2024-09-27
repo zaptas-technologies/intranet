@@ -6,7 +6,7 @@ const {
   getAnnouncementDetails,
   editAnnouncement,
   deleteAnnouncement,
-} = require('../controller/announcementController');
+} = require('../controller/announcements/announcementController');
 
 const {  
   likeAnnouncement,
@@ -14,7 +14,7 @@ const {
   addCommentToAnnouncement,
   editComment,
   deleteComment
-} = require('../controller/announcementLikeComment');
+} = require('../controller/announcements/announcementLikeComment');
 
 // GET latest announcements
 router.get('/latest', getLatestAnnouncements);

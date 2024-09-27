@@ -3,17 +3,28 @@ const mongoose = require('mongoose');
 
 
 
-// Like an announcement
+
+// Unlike an announcement
 const likeAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
     const userId = req.body.userId;
 
-    // Check if ID is valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(announcementId)) {
+    console.log(userId,'dd')
+
+    // Check if userId is provided
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid announcement ID',
+        message: 'User ID is required',
+      });
+    }
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement or user ID',
       });
     }
 
@@ -58,11 +69,19 @@ const addCommentToAnnouncement = async (req, res) => {
     const announcementId = req.params.id;
     const { userId, comment } = req.body;
 
-    // Check if ID is valid MongoDB ObjectId
-    if (!mongoose.Types.ObjectId.isValid(announcementId)) {
+    // Check if userId is provided
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid announcement ID',
+        message: 'User ID is required',
+      });
+    }
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement or user ID',
       });
     }
 
@@ -101,52 +120,60 @@ const addCommentToAnnouncement = async (req, res) => {
 
 // Unlike an announcement
 const unlikeAnnouncement = async (req, res) => {
-    try {
-      const announcementId = req.params.id;
-      const userId = req.body.userId;
-  
-      // Check if ID is valid MongoDB ObjectId
-      if (!mongoose.Types.ObjectId.isValid(announcementId)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid announcement ID',
-        });
-      }
-  
-      const announcement = await Announcement.findById(announcementId);
-  
-      if (!announcement) {
-        return res.status(404).json({
-          success: false,
-          message: 'Announcement not found',
-        });
-      }
-  
-      // Check if user has not liked the announcement
-      if (!announcement.likes.includes(userId)) {
-        return res.status(400).json({
-          success: false,
-          message: 'You have not liked this announcement',
-        });
-      }
-  
-      // Remove the user's like from the announcement
-      announcement.likes = announcement.likes.filter(id => id.toString() !== userId);
-      await announcement.save();
-  
-      res.status(200).json({
-        success: true,
-        message: 'Announcement unliked successfully',
-        likes: announcement.likes.length, // Return the updated like count
-      });
-    } catch (error) {
-      res.status(500).json({
+  try {
+    const announcementId = req.params.id;
+    const userId = req.body.userId;
+
+    // Check if userId is provided
+    if (!userId) {
+      return res.status(400).json({
         success: false,
-        message: 'Server error while unliking the announcement',
-        error: error.message,
+        message: 'User ID is required',
       });
     }
-  };
+
+    // Check if ID is valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid announcement or user ID',
+      });
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    // Check if user has not liked the announcement
+    if (!announcement.likes.includes(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'You have not liked this announcement',
+      });
+    }
+
+    // Remove the user's like from the announcement
+    announcement.likes = announcement.likes.filter(id => id?.toString() !== userId);
+    await announcement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Announcement unliked successfully',
+      likes: announcement.likes.length, // Return the updated like count
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while unliking the announcement',
+      error: error.message,
+    });
+  }
+};
 
   // Edit a comment
 const editComment = async (req, res) => {
@@ -208,7 +235,7 @@ const editComment = async (req, res) => {
   
 
   // Delete a comment
-const deleteComment = async (req, res) => {
+  const deleteComment = async (req, res) => {
     try {
       const announcementId = req.params.id;
       const { commentId, userId } = req.body;
@@ -247,14 +274,17 @@ const deleteComment = async (req, res) => {
         });
       }
   
+      // Store the deleted comment before removing
+      const deletedComment = commentToDelete.toObject(); // Convert to plain object before removing
+  
       // Remove the comment
-      commentToDelete.remove();
+      announcement.comments.pull(commentId); 
       await announcement.save();
   
       res.status(200).json({
         success: true,
         message: 'Comment deleted successfully',
-        comments: announcement.comments,
+        deletedComment, // Return only the deleted comment
       });
     } catch (error) {
       res.status(500).json({
@@ -266,6 +296,8 @@ const deleteComment = async (req, res) => {
   };
   
   
+  
+  
   module.exports = {
   
     likeAnnouncement,
@@ -275,3 +307,4 @@ const deleteComment = async (req, res) => {
     deleteComment,  // Newly added
   };
   
+
