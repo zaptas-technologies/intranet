@@ -53,17 +53,32 @@ const announcementSchema = new Schema({
   timestamps: true, // Automatically adds createdAt and updatedAt fields
 });
 
-// Pre-save hook to sanitize inputs
-announcementSchema.pre('save', function (next) {
-  // Sanitize title and content
-  if (this.isModified('title')) {
-    this.title = validator.escape(this.title.trim());
+// Pre-save hook to sanitize inputs and handle errors
+announcementSchema.pre('save', async function (next) {
+  try {
+    // Sanitize title and content
+    if (this.isModified('title')) {
+      this.title = validator.escape(this.title.trim());
+    }
+    if (this.isModified('content')) {
+      this.content = validator.escape(this.content.trim());
+    }
+
+    // Check for duplicate announcements
+    const existingAnnouncement = await this.constructor.findOne({
+      title: this.title,
+      author: this.author,
+    });
+
+    if (existingAnnouncement) {
+      return next(new Error('An announcement with the same title by this author already exists.'));
+    }
+
+    next();
+  } catch (error) {
+    // Pass any errors to the next middleware
+    next(error);
   }
-  if (this.isModified('content')) {
-    this.content = validator.escape(this.content.trim());
-  }
-  
-  next();
 });
 
 // Virtual field to get the total number of comments
