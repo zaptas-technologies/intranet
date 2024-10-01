@@ -15,7 +15,10 @@ const userSchema = new Schema({
     required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
-    validate: [validator.isEmail, 'Invalid email address'],
+    validate: {
+      validator: validator.isEmail,
+      message: 'Invalid email address'
+    },
   },
   password: {
     type: String,
@@ -37,23 +40,37 @@ const userSchema = new Schema({
 
 // Pre-save hook to hash password before saving
 userSchema.pre('save', async function (next) {
+  // Check if the password is modified
   if (!this.isModified('password')) {
     return next();
   }
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
-    next(error);
+    next(new Error(`Error hashing password: ${error.message}`)); // Custom error message
   }
 });
 
 // Method to compare user-entered password with the hashed password in the DB
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  try {
+    return await bcrypt.compare(enteredPassword, this.password);
+  } catch (error) {
+    throw new Error(`Error comparing passwords: ${error.message}`); // Custom error message
+  }
 };
+
+// Handling duplicate email error with custom message
+userSchema.post('save', function (error, doc, next) {
+  if (error.name === 'MongoError' && error.code === 11000) {
+    next(new Error('Email already exists, please use a different email.'));
+  } else {
+    next(error);
+  }
+});
 
 const User = mongoose.model('User', userSchema);
 

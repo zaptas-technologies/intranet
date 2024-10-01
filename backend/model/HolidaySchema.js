@@ -31,15 +31,20 @@ const HolidaySchema = new mongoose.Schema({
     type: String,
     trim: true 
   },
-
-  region: { 
+  department: { 
     type: String, 
-    default: ' India',  // Default country
+    default: 'All',  // Default department
+    trim: true 
+  },
+  location: { 
+    type: String, 
+    default: 'India',  // Default location
     trim: true 
   },
   isActive: { 
     type: Boolean, 
-    default: true 
+    required: [true, 'Active status is required'],  // Ensure isActive is required
+    default: true,  // Default value is active
   },
   createdAt: { 
     type: Date, 
@@ -53,3 +58,4 @@ const HolidaySchema = new mongoose.Schema({
 
 // Export Holiday model
 const Holiday = mongoose.model('Holiday', HolidaySchema);
+module.exports = Holiday;

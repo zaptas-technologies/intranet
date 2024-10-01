@@ -8,15 +8,14 @@ const announcementSchema = new Schema({
     required: [true, 'Title is required'],
     trim: true,
     minlength: [5, 'Title must be at least 5 characters long'],
+    // Optionally, add a maximum length
+    maxlength: [100, 'Title cannot exceed 100 characters'],
   },
   content: {
     type: String,
     required: [true, 'Content is required'],
     minlength: [10, 'Content must be at least 10 characters long'],
-  },
-  createdDate: {
-    type: Date,
-    default: Date.now,
+    maxlength: [1000, 'Content cannot exceed 1000 characters'],
   },
   author: {
     type: Schema.Types.ObjectId, // Reference to a user collection
