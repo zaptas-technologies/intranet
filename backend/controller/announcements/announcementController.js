@@ -151,6 +151,7 @@ const deleteAnnouncement = async (req, res) => {
       });
     }
    
+   
 
 
     // Find the announcement by ID
@@ -163,8 +164,9 @@ const deleteAnnouncement = async (req, res) => {
       });
     }
 
+
     // Check if the user is the creator of the announcement
-    if (announcement.createdBy.toString() !== userId) {
+    if (announcement.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'You are not authorized to delete this announcement',
