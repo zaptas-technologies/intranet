@@ -138,12 +138,12 @@ const editAnnouncement = async (req, res) => {
 
 
 
-// Delete an announcement
 const deleteAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
+    const userId = req.user.id; // Assuming req.user is populated with the authenticated user's info
 
-    // Check if ID is valid MongoDB ObjectId
+    // Check if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(announcementId)) {
       return res.status(400).json({
         success: false,
@@ -151,6 +151,7 @@ const deleteAnnouncement = async (req, res) => {
       });
     }
 
+    // Find the announcement by ID
     const announcement = await Announcement.findById(announcementId);
 
     if (!announcement) {
@@ -160,7 +161,16 @@ const deleteAnnouncement = async (req, res) => {
       });
     }
 
-    await announcement.remove();
+    // Check if the user is the creator of the announcement
+    if (announcement.createdBy.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this announcement',
+      });
+    }
+
+    // Delete the announcement
+    await Announcement.findByIdAndDelete(announcementId);
 
     res.status(200).json({
       success: true,
