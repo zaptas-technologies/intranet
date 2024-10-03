@@ -63,16 +63,6 @@ announcementSchema.pre('save', async function (next) {
       this.content = validator.escape(this.content.trim());
     }
 
-    // Check for duplicate announcements
-    const existingAnnouncement = await this.constructor.findOne({
-      title: this.title,
-      author: this.author,
-    });
-
-    if (existingAnnouncement) {
-      return next(new Error('An announcement with the same title by this author already exists.'));
-    }
-
     next();
   } catch (error) {
     // Pass any errors to the next middleware

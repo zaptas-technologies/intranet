@@ -10,7 +10,6 @@ const likeAnnouncement = async (req, res) => {
     const announcementId = req.params.id;
     const userId = req.body.userId;
 
-    console.log(userId,'dd')
 
     // Check if userId is provided
     if (!userId) {
