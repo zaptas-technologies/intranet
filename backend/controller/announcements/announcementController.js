@@ -141,7 +141,7 @@ const editAnnouncement = async (req, res) => {
 const deleteAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const userId = req.user.id; // Assuming req.user is populated with the authenticated user's info
+    const userId = req.body.userId;
 
     // Check if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(announcementId)) {
@@ -150,6 +150,8 @@ const deleteAnnouncement = async (req, res) => {
         message: 'Invalid announcement ID',
       });
     }
+   
+
 
     // Find the announcement by ID
     const announcement = await Announcement.findById(announcementId);
