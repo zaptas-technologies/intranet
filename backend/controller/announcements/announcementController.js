@@ -112,7 +112,7 @@ const editAnnouncement = async (req, res) => {
       announcement.tags = tags;
       isUpdated = true;
     }
-
+    await announcement.save();
     if (!isUpdated) {
       return res.status(400).json({
         success: false,
@@ -120,7 +120,7 @@ const editAnnouncement = async (req, res) => {
       });
     }
 
-    await announcement.save();
+   
 
     res.status(200).json({
       success: true,
