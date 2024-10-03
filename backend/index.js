@@ -3,6 +3,8 @@ const express = require('express');
 const config = require('./config/connect');
 const announcementRoutes = require('./routes/announcementRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
+const userRoutes = require('./routes/auth');
+const { protect } = require('./Middleware/jwtAuthorization');
 
 const app = express();
 
@@ -10,6 +12,7 @@ const app = express();
 app.use(express.json());
 
 // Define routes
+app.use('/v1', userRoutes);
 app.use('/v1/announcements', announcementRoutes);
 app.use('/v1/calendar', calendarRoutes);
 

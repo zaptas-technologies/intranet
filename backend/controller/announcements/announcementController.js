@@ -152,9 +152,6 @@ const deleteAnnouncement = async (req, res) => {
       });
     }
    
-   
-
-
     // Find the announcement by ID
     const announcement = await Announcement.findById(announcementId);
 
