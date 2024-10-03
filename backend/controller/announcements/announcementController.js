@@ -189,10 +189,62 @@ const deleteAnnouncement = async (req, res) => {
   }
 };
 
+
+
+const createAnnouncement = async (req, res) => {
+  try {
+    const { title, content, author, tags } = req.body;
+
+    // Validate required fields
+    if (!title || !content || !author) {
+      return res.status(400).json({
+        success: false,
+        message: 'Title, content, and author are required.',
+      });
+    }
+
+    // Validate author ID
+    if (!mongoose.Types.ObjectId.isValid(author)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid author ID.',
+      });
+    }
+
+    // Create a new announcement instance
+    const newAnnouncement = new Announcement({
+      title,
+      content,
+      author: mongoose.Types.ObjectId(author), // Ensure author is an ObjectId
+      tags: tags || [], // Use provided tags or default to an empty array
+    });
+
+    // Save the announcement to the database
+    await newAnnouncement.save();
+
+    res.status(201).json({
+      success: true,
+      message: 'Announcement created successfully.',
+      data: newAnnouncement,
+    });
+  } catch (error) {
+    console.error('Error creating announcement:', error); // Log the error for debugging
+    res.status(500).json({
+      success: false,
+      message: 'Server error while creating announcement.',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
 module.exports = {
+  createAnnouncement,
   getLatestAnnouncements,
   getAnnouncementsBrief,
   getAnnouncementDetails,
-  editAnnouncement,  // Newly added
-  deleteAnnouncement,  // Newly added
+  editAnnouncement,  
+  deleteAnnouncement,  
 };
