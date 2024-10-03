@@ -1,5 +1,6 @@
 const Holiday = require('../../model/HolidaySchema');
 const Event = require('../../model/EventSchema');
+const sendResponse = require('../../utility/responseHelper');
 
 // Create a new holiday
 exports.createHoliday = async (req, res) => {
@@ -8,7 +9,7 @@ exports.createHoliday = async (req, res) => {
 
         // Validate request body
         if (!name || !startDate || !endDate) {
-            return res.status(400).json({ message: 'Name, start date, and end date are required.' });
+            return sendResponse(res, 400, 'Validation Error: Name, start date, and end date are required.', false);
         }
 
         // Create holiday
@@ -17,16 +18,17 @@ exports.createHoliday = async (req, res) => {
             startDate,
             endDate,
             description,
-            department: department || 'All', // Default to 'All'
-            location: location || 'India', // Default to 'India'
-            isActive: isActive !== undefined ? isActive : true // Default to true
+            department: department || 'All',
+            location: location || 'India',
+            isActive: isActive !== undefined ? isActive : true
         });
 
         await holiday.save();
-        return res.status(201).json(holiday);
+        return sendResponse(res, 201, 'Holiday created successfully', holiday);
+      
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to create holiday.', false);
     }
 };
 
@@ -37,7 +39,7 @@ exports.createEvent = async (req, res) => {
 
         // Validate request body
         if (!title || !date) {
-            return res.status(400).json({ message: 'Title and date are required.' });
+            return sendResponse(res, 400, 'Validation Error: Title and date are required.', false);
         }
 
         // Create event
@@ -45,16 +47,16 @@ exports.createEvent = async (req, res) => {
             title,
             date,
             description,
-            location: location || 'India', // Default to 'India'
-            department: department || 'All', // Default to 'All'
-            isActive: isActive !== undefined ? isActive : true // Default to true
+            location: location || 'India',
+            department: department || 'All',
+            isActive: isActive !== undefined ? isActive : true
         });
 
         await event.save();
-        return res.status(201).json(event);
+        return sendResponse(res, 201, 'Event created successfully', event);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to create event.', false);
     }
 };
 
@@ -62,10 +64,10 @@ exports.createEvent = async (req, res) => {
 exports.getHolidays = async (req, res) => {
     try {
         const holidays = await Holiday.find();
-        return res.status(200).json(holidays);
+        return sendResponse(res, 200, 'Holidays retrieved successfully', holidays);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to retrieve holidays.', false);
     }
 };
 
@@ -73,10 +75,10 @@ exports.getHolidays = async (req, res) => {
 exports.getEvents = async (req, res) => {
     try {
         const events = await Event.find();
-        return res.status(200).json(events);
+        return sendResponse(res, 200, 'Events retrieved successfully', events);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to retrieve events.', false);
     }
 };
 
@@ -87,13 +89,13 @@ exports.updateHoliday = async (req, res) => {
         const updatedHoliday = await Holiday.findByIdAndUpdate(holidayId, req.body, { new: true, runValidators: true });
 
         if (!updatedHoliday) {
-            return res.status(404).json({ message: 'Holiday not found' });
+            return sendResponse(res, 404, 'Not Found: Holiday not found.', false);
         }
 
-        return res.status(200).json(updatedHoliday);
+        return sendResponse(res, 200, 'Holiday updated successfully', updatedHoliday);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to update holiday.', false);
     }
 };
 
@@ -104,13 +106,13 @@ exports.updateEvent = async (req, res) => {
         const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true, runValidators: true });
 
         if (!updatedEvent) {
-            return res.status(404).json({ message: 'Event not found' });
+            return sendResponse(res, 404, 'Not Found: Event not found.', false);
         }
 
-        return res.status(200).json(updatedEvent);
+        return sendResponse(res, 200, 'Event updated successfully', updatedEvent);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to update event.', false);
     }
 };
 
@@ -121,13 +123,13 @@ exports.deleteHoliday = async (req, res) => {
         const deletedHoliday = await Holiday.findByIdAndDelete(holidayId);
 
         if (!deletedHoliday) {
-            return res.status(404).json({ message: 'Holiday not found' });
+            return sendResponse(res, 404, 'Not Found: Holiday not found.', false);
         }
 
-        return res.status(204).json();
+        return sendResponse(res, 200, 'Holiday deleted successfully.', false);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to delete holiday.', false);
     }
 };
 
@@ -138,12 +140,12 @@ exports.deleteEvent = async (req, res) => {
         const deletedEvent = await Event.findByIdAndDelete(eventId);
 
         if (!deletedEvent) {
-            return res.status(404).json({ message: 'Event not found' });
+            return sendResponse(res, 404, 'Not Found: Event not found.', false);
         }
 
-        return res.status(204).json();
+        return sendResponse(res, 200, 'Event deleted successfully.', false);
     } catch (error) {
         console.error(error);
-        return res.status(500).json({ message: 'Internal server error' });
+        return sendResponse(res, 500, 'Internal Server Error: Unable to delete event.', false);
     }
 };
