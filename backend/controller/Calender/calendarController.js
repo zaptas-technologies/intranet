@@ -18,6 +18,7 @@ exports.createHoliday = async (req, res) => {
             startDate,
             endDate,
             description,
+            author:req.userId,
             department: department || 'All',
             location: location || 'India',
             isActive: isActive !== undefined ? isActive : true
@@ -47,6 +48,7 @@ exports.createEvent = async (req, res) => {
             title,
             date,
             description,
+            author:req.userId,
             location: location || 'India',
             department: department || 'All',
             isActive: isActive !== undefined ? isActive : true
@@ -86,11 +88,27 @@ exports.getEvents = async (req, res) => {
 exports.updateHoliday = async (req, res) => {
     try {
         const holidayId = req.params.id;
-        const updatedHoliday = await Holiday.findByIdAndUpdate(holidayId, req.body, { new: true, runValidators: true });
+        const { startDate, endDate } = req.body;
 
-        if (!updatedHoliday) {
+        // Ensure startDate is before endDate if provided
+        if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+            return sendResponse(res, 400, false, 'Validation Error: Start date must be before end date.', null);
+        }
+
+        // Find the holiday to update
+        const holiday = await Holiday.findById(holidayId);
+
+        if (!holiday) {
             return sendResponse(res, 404, false, 'Not Found: Holiday not found.', null);
         }
+
+        // Check if the user is the author of the holiday
+        if (holiday.author.toString() !== req.userId) {
+            return sendResponse(res, 403, false, 'Forbidden: You are not authorized to update this holiday.', null);
+        }
+
+        // Update the holiday
+        const updatedHoliday = await Holiday.findByIdAndUpdate(holidayId, req.body, { new: true, runValidators: true });
 
         return sendResponse(res, 200, true, 'Holiday updated successfully', updatedHoliday);
     } catch (error) {
@@ -103,11 +121,27 @@ exports.updateHoliday = async (req, res) => {
 exports.updateEvent = async (req, res) => {
     try {
         const eventId = req.params.id;
-        const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true, runValidators: true });
+        const { date } = req.body;
 
-        if (!updatedEvent) {
+        // Ensure the event date is in the future if provided
+        if (date && new Date(date) < Date.now()) {
+            return sendResponse(res, 400, false, 'Validation Error: Event date must be in the future.', null);
+        }
+
+        // Find the event to update
+        const event = await Event.findById(eventId);
+
+        if (!event) {
             return sendResponse(res, 404, false, 'Not Found: Event not found.', null);
         }
+
+        // Check if the user is the author of the event
+        if (event.author.toString() !== req.userId) {
+            return sendResponse(res, 403, false, 'Forbidden: You are not authorized to update this event.', null);
+        }
+
+        // Update the event
+        const updatedEvent = await Event.findByIdAndUpdate(eventId, req.body, { new: true, runValidators: true });
 
         return sendResponse(res, 200, true, 'Event updated successfully', updatedEvent);
     } catch (error) {
@@ -120,11 +154,21 @@ exports.updateEvent = async (req, res) => {
 exports.deleteHoliday = async (req, res) => {
     try {
         const holidayId = req.params.id;
-        const deletedHoliday = await Holiday.findByIdAndDelete(holidayId);
 
-        if (!deletedHoliday) {
+        // Find the holiday to delete
+        const holiday = await Holiday.findById(holidayId);
+
+        if (!holiday) {
             return sendResponse(res, 404, false, 'Not Found: Holiday not found.', null);
         }
+
+        // Check if the user is the author of the holiday
+        if (holiday.author.toString() !== req.userId) {
+            return sendResponse(res, 403, false, 'Forbidden: You are not authorized to delete this holiday.', null);
+        }
+
+        // Delete the holiday
+        await Holiday.findByIdAndDelete(holidayId);
 
         return sendResponse(res, 200, true, 'Holiday deleted successfully.', null);
     } catch (error) {
@@ -137,11 +181,21 @@ exports.deleteHoliday = async (req, res) => {
 exports.deleteEvent = async (req, res) => {
     try {
         const eventId = req.params.id;
-        const deletedEvent = await Event.findByIdAndDelete(eventId);
 
-        if (!deletedEvent) {
+        // Find the event to delete
+        const event = await Event.findById(eventId);
+
+        if (!event) {
             return sendResponse(res, 404, false, 'Not Found: Event not found.', null);
         }
+
+        // Check if the user is the author of the event
+        if (event.author.toString() !== req.userId) {
+            return sendResponse(res, 403, false, 'Forbidden: You are not authorized to delete this event.', null);
+        }
+
+        // Delete the event
+        await Event.findByIdAndDelete(eventId);
 
         return sendResponse(res, 200, true, 'Event deleted successfully.', null);
     } catch (error) {

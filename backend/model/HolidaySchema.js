@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const { Schema } = mongoose;
 // Holiday Schema
 const HolidaySchema = new mongoose.Schema({
   name: { 
@@ -7,6 +7,12 @@ const HolidaySchema = new mongoose.Schema({
     required: [true, 'Holiday name is required'], 
     trim: true 
   },
+  author: {
+    type: Schema.Types.ObjectId, // Reference to a user collection
+    ref: 'User',
+    required: [true, 'Author is required'],
+  },
+  
   startDate: { 
     type: Date, 
     required: [true, 'Start date is required'],

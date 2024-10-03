@@ -1,11 +1,16 @@
 const mongoose = require('mongoose');
-
+const { Schema } = mongoose;
 // Event Schema
 const EventSchema = new mongoose.Schema({
   title: { 
     type: String, 
     required: [true, 'Event title is required'], 
     trim: true 
+  },
+  author: {
+    type: Schema.Types.ObjectId, // Reference to a user collection
+    ref: 'User',
+    required: [true, 'Author is required'],
   },
   date: { 
     type: Date, 
