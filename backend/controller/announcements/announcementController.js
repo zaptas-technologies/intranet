@@ -1,5 +1,6 @@
 const Announcement = require('../../model/Announcement'); // Assuming the model file path is correct
 const mongoose = require('mongoose');
+const User = require('../../model/user');
 
 // Get latest announcements
 const getLatestAnnouncements = async (req, res) => {
@@ -203,11 +204,32 @@ const createAnnouncement = async (req, res) => {
       });
     }
 
-    // Validate author ID
-    if (!mongoose.Types.ObjectId.isValid(author)) {
-      return res.status(400).json({
+       // Check if ID is a valid MongoDB ObjectId
+       if (!mongoose.Types.ObjectId.isValid(author)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid announcement ID',
+        });
+      }
+     
+
+    // Check if the author exists in the database
+    const existingUser = await User.findById(author);
+  
+    if (!existingUser) {
+      return res.status(404).json({
         success: false,
-        message: 'Invalid author ID.',
+        message: 'Author not found.',
+      });
+    }
+
+    // Check if an announcement with the same title and author already exists
+    const existingAnnouncement = await Announcement.findOne({ title, author: author });
+
+    if (existingAnnouncement) {
+      return res.status(409).json({
+        success: false,
+        message: 'An announcement with the same title by this author already exists.',
       });
     }
 
@@ -215,7 +237,7 @@ const createAnnouncement = async (req, res) => {
     const newAnnouncement = new Announcement({
       title,
       content,
-      author: mongoose.Types.ObjectId(author), // Ensure author is an ObjectId
+      author: author, // Ensure author is an ObjectId
       tags: tags || [], // Use provided tags or default to an empty array
     });
 
@@ -236,6 +258,7 @@ const createAnnouncement = async (req, res) => {
     });
   }
 };
+
 
 
 

@@ -7,7 +7,7 @@ const {
   getAnnouncementDetails,
   editAnnouncement,
   deleteAnnouncement,
-  createAnnouncement, // Import the createAnnouncement function
+  createAnnouncement,
 } = require('../controller/announcements/announcementController');
 
 const {  
@@ -32,13 +32,23 @@ const validateAnnouncementId = [
   param('id').isMongoId().withMessage('Invalid announcement ID'),
 ];
 
-// Validation for creating an announcement
+// Validation for comments
+const validateComment = [
+  body('comment').notEmpty().withMessage('Comment cannot be empty.'),
+];
+
+
 const validateCreateAnnouncement = [
   body('title').notEmpty().withMessage('Title is required.').isLength({ min: 5, max: 100 }).withMessage('Title must be between 5 and 100 characters.'),
   body('content').notEmpty().withMessage('Content is required.').isLength({ min: 10, max: 1000 }).withMessage('Content must be between 10 and 1000 characters.'),
   body('author').isMongoId().withMessage('Invalid author ID.'),
   body('tags').optional().isArray().withMessage('Tags must be an array.'),
 ];
+
+
+//create
+router.post('/create', validateCreateAnnouncement, handleValidationErrors, createAnnouncement); // New route for creating announcements
+
 
 // GET latest announcements
 router.get('/latest', getLatestAnnouncements);
@@ -48,9 +58,6 @@ router.get('/brief', getAnnouncementsBrief);
 
 // GET detailed announcement by ID
 router.get('/:id', validateAnnouncementId, handleValidationErrors, getAnnouncementDetails);
-
-// POST create an announcement
-router.post('/create', validateCreateAnnouncement, handleValidationErrors, createAnnouncement); // New route for creating announcements
 
 // POST like an announcement
 router.post('/:id/like', validateAnnouncementId, handleValidationErrors, likeAnnouncement);
