@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken'); // For generating tokens
 const User = require('../../model/user');
 const { generateToken } = require('../../Middleware/jwtAuthorization');
+const sendResponse = require('../../utility/responseHelper');
 
 // Signup function
 const signup = async (req, res) => {
@@ -9,19 +10,13 @@ const signup = async (req, res) => {
 
         // Validate required fields
         if (!name || !email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Name, email, and password are required.',
-            });
+            return sendResponse(res, 400, false, 'Name, email, and password are required.');
         }
 
         // Check if the user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(409).json({
-                success: false,
-                message: 'Email already in use. Please use a different email.',
-            });
+            return sendResponse(res, 409, false, 'Email already in use. Please use a different email.');
         }
 
         // Create a new user instance
@@ -34,21 +29,12 @@ const signup = async (req, res) => {
         // Save the user to the database
         await newUser.save();
 
-        res.status(201).json({
-            success: true,
-            message: 'User registered successfully.',
-            data: newUser,
-        });
+        return sendResponse(res, 201, true, 'User registered successfully.', newUser);
     } catch (error) {
         console.error('Error registering user:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error while registering user.',
-            error: error.message,
-        });
+        return sendResponse(res, 500, false, 'Server error while registering user.', null, error.message);
     }
 };
-
 
 // Login function
 const login = async (req, res) => {
@@ -57,46 +43,28 @@ const login = async (req, res) => {
 
         // Validate required fields
         if (!email || !password) {
-            return res.status(400).json({
-                success: false,
-                message: 'Email and password are required.',
-            });
+            return sendResponse(res, 400, false, 'Email and password are required.');
         }
 
         // Find user by email
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password.',
-            });
+            return sendResponse(res, 401, false, 'Invalid email or password.');
         }
 
         // Check if password matches
         const isMatch = await user.matchPassword(password);
         if (!isMatch) {
-            return res.status(401).json({
-                success: false,
-                message: 'Invalid email or password.',
-            });
+            return sendResponse(res, 401, false, 'Invalid email or password.');
         }
 
         // Create and send a JWT token
-        const token = generateToken(user._id)
+        const token = generateToken(user._id);
 
-
-        res.status(200).json({
-            success: true,
-            message: 'Login successful.',
-            token,
-        });
+        return sendResponse(res, 200, true, 'Login successful.', { token });
     } catch (error) {
         console.error('Error logging in:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Server error while logging in.',
-            error: error.message,
-        });
+        return sendResponse(res, 500, false, 'Server error while logging in.', null, error.message);
     }
 };
 
