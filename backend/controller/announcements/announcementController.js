@@ -191,7 +191,8 @@ const deleteAnnouncement = async (req, res) => {
 
 const createAnnouncement = async (req, res) => {
   try {
-    const { title, content, author, tags } = req.body;
+    const { title, content, tags } = req.body;
+    const author = req.userId
 
     // Validate required fields
     if (!title || !content || !author) {
