@@ -26,7 +26,10 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
-
+// Validation for liking/unliking an announcement
+const validateAnnouncementId = [
+  param('id').isMongoId().withMessage('Invalid announcement ID'),
+];
 
 // Validation for comments
 const validateComment = [
@@ -40,27 +43,27 @@ router.get('/latest', getLatestAnnouncements);
 router.get('/brief', getAnnouncementsBrief);
 
 // GET detailed announcement by ID
-router.get('/:id', handleValidationErrors, getAnnouncementDetails);
+router.get('/:id', validateAnnouncementId, handleValidationErrors, getAnnouncementDetails);
 
 // POST like an announcement
-router.post('/:id/like', handleValidationErrors, likeAnnouncement);
+router.post('/:id/like', validateAnnouncementId, handleValidationErrors, likeAnnouncement);
 
 // POST unlike an announcement
-router.post('/:id/unlike', handleValidationErrors, unlikeAnnouncement);
+router.post('/:id/unlike', validateAnnouncementId, handleValidationErrors, unlikeAnnouncement);
 
 // POST add a comment to an announcement
-router.post('/:id/comment', validateComment, handleValidationErrors, addCommentToAnnouncement);
+router.post('/:id/comment', validateAnnouncementId, validateComment, handleValidationErrors, addCommentToAnnouncement);
 
 // PUT edit a comment
-router.put('/:id/edit-comment', validateComment, handleValidationErrors, editComment);
+router.put('/:id/edit-comment', validateAnnouncementId, validateComment, handleValidationErrors, editComment);
 
 // DELETE a comment
-router.delete('/:id/comment', handleValidationErrors, deleteComment);
+router.delete('/:id/comment', validateAnnouncementId, handleValidationErrors, deleteComment);
 
 // PUT edit an announcement
-router.put('/:id', handleValidationErrors, editAnnouncement);
+router.put('/:id', validateAnnouncementId, handleValidationErrors, editAnnouncement);
 
 // DELETE an announcement
-router.delete('/:id', handleValidationErrors, deleteAnnouncement);
+router.delete('/:id', validateAnnouncementId, handleValidationErrors, deleteAnnouncement);
 
 module.exports = router;

@@ -74,7 +74,6 @@ const getAnnouncementDetails = async (req, res) => {
 
 
 
-// Edit an announcement
 const editAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
@@ -97,10 +96,29 @@ const editAnnouncement = async (req, res) => {
       });
     }
 
+    // Track whether any updates were made
+    let isUpdated = false;
+
     // Update the announcement fields
-    if (title) announcement.title = title;
-    if (content) announcement.content = content;
-    if (tags) announcement.tags = tags;
+    if (title && title !== announcement.title) {
+      announcement.title = title;
+      isUpdated = true;
+    }
+    if (content && content !== announcement.content) {
+      announcement.content = content;
+      isUpdated = true;
+    }
+    if (tags && JSON.stringify(tags) !== JSON.stringify(announcement.tags)) {
+      announcement.tags = tags;
+      isUpdated = true;
+    }
+
+    if (!isUpdated) {
+      return res.status(400).json({
+        success: false,
+        message: 'No fields were updated',
+      });
+    }
 
     await announcement.save();
 
@@ -117,6 +135,7 @@ const editAnnouncement = async (req, res) => {
     });
   }
 };
+
 
 
 // Delete an announcement
