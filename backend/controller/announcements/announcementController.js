@@ -142,7 +142,7 @@ const editAnnouncement = async (req, res) => {
 const deleteAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const userId = req.body.userId;
+    const userId = req.userId;
 
     // Check if ID is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(announcementId)) {

@@ -23,7 +23,7 @@ const protect = (req, res, next) => {
     // Verify the token
     try {
         const decoded = jwt.verify(token, config.jwt.secret);
-        req.user = { id: decoded.id }; // Attach user ID to request
+        req.userId = decoded.id ; // Attach user ID to request
         next();
     } catch (error) {
         // Handle specific error cases

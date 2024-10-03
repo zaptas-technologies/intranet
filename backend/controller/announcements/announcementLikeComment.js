@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const likeAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const userId = req.body.userId;
+    const userId = req.userId;
 
 
     // Check if userId is provided
@@ -66,7 +66,8 @@ const likeAnnouncement = async (req, res) => {
 const addCommentToAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const { userId, comment } = req.body;
+    const { comment } = req.body;
+    const userId= req.userId
 
     // Check if userId is provided
     if (!userId) {
@@ -121,7 +122,7 @@ const addCommentToAnnouncement = async (req, res) => {
 const unlikeAnnouncement = async (req, res) => {
   try {
     const announcementId = req.params.id;
-    const userId = req.body.userId;
+    const userId = req.userId;
 
     // Check if userId is provided
     if (!userId) {
@@ -174,136 +175,138 @@ const unlikeAnnouncement = async (req, res) => {
   }
 };
 
-  // Edit a comment
+// Edit a comment
 const editComment = async (req, res) => {
-    try {
-      const announcementId = req.params.id;
-      const { commentId, userId, comment } = req.body;
-  
-      // Check if IDs are valid MongoDB ObjectIds
-      if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(commentId)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid ID',
-        });
-      }
-  
-      const announcement = await Announcement.findById(announcementId);
-  
-      if (!announcement) {
-        return res.status(404).json({
-          success: false,
-          message: 'Announcement not found',
-        });
-      }
-  
-      const commentToEdit = announcement.comments.id(commentId);
-  
-      if (!commentToEdit) {
-        return res.status(404).json({
-          success: false,
-          message: 'Comment not found',
-        });
-      }
-  
-      // Check if the comment belongs to the user
-      if (commentToEdit.user.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: 'You are not authorized to edit this comment',
-        });
-      }
-  
-      // Update the comment
-      commentToEdit.comment = comment;
-      await announcement.save();
-  
-      res.status(200).json({
-        success: true,
-        message: 'Comment edited successfully',
-        comments: announcement.comments,
-      });
-    } catch (error) {
-      res.status(500).json({
-        success: false,
-        message: 'Server error while editing comment',
-        error: error.message,
-      });
-    }
-  };
-  
+  try {
+    const announcementId = req.params.id;
+    const { commentId, comment } = req.body;
+    const userId=req.userId;
 
-  // Delete a comment
-  const deleteComment = async (req, res) => {
-    try {
-      const announcementId = req.params.id;
-      const { commentId, userId } = req.body;
-  
-      // Check if IDs are valid MongoDB ObjectIds
-      if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(commentId)) {
-        return res.status(400).json({
-          success: false,
-          message: 'Invalid ID',
-        });
-      }
-  
-      const announcement = await Announcement.findById(announcementId);
-  
-      if (!announcement) {
-        return res.status(404).json({
-          success: false,
-          message: 'Announcement not found',
-        });
-      }
-  
-      const commentToDelete = announcement.comments.id(commentId);
-  
-      if (!commentToDelete) {
-        return res.status(404).json({
-          success: false,
-          message: 'Comment not found',
-        });
-      }
-  
-      // Check if the comment belongs to the user
-      if (commentToDelete.user.toString() !== userId) {
-        return res.status(403).json({
-          success: false,
-          message: 'You are not authorized to delete this comment',
-        });
-      }
-  
-      // Store the deleted comment before removing
-      const deletedComment = commentToDelete.toObject(); // Convert to plain object before removing
-  
-      // Remove the comment
-      announcement.comments.pull(commentId); 
-      await announcement.save();
-  
-      res.status(200).json({
-        success: true,
-        message: 'Comment deleted successfully',
-        deletedComment, // Return only the deleted comment
-      });
-    } catch (error) {
-      res.status(500).json({
+    // Check if IDs are valid MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({
         success: false,
-        message: 'Server error while deleting comment',
-        error: error.message,
+        message: 'Invalid ID',
       });
     }
-  };
-  
-  
-  
-  
-  module.exports = {
-  
-    likeAnnouncement,
-    unlikeAnnouncement,  // Newly added
-    addCommentToAnnouncement,
-    editComment,  // Newly added
-    deleteComment,  // Newly added
-  };
-  
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    const commentToEdit = announcement.comments.id(commentId);
+
+    if (!commentToEdit) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    // Check if the comment belongs to the user
+    if (commentToEdit.user.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to edit this comment',
+      });
+    }
+
+    // Update the comment
+    commentToEdit.comment = comment;
+    await announcement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment edited successfully',
+      comments: announcement.comments,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while editing comment',
+      error: error.message,
+    });
+  }
+};
+
+
+// Delete a comment
+const deleteComment = async (req, res) => {
+  try {
+    const announcementId = req.params.id;
+    const { commentId } = req.body;
+    const userId = req.userId
+
+    // Check if IDs are valid MongoDB ObjectIds
+    if (!mongoose.Types.ObjectId.isValid(announcementId) || !mongoose.Types.ObjectId.isValid(commentId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid ID',
+      });
+    }
+
+    const announcement = await Announcement.findById(announcementId);
+
+    if (!announcement) {
+      return res.status(404).json({
+        success: false,
+        message: 'Announcement not found',
+      });
+    }
+
+    const commentToDelete = announcement.comments.id(commentId);
+
+    if (!commentToDelete) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    // Check if the comment belongs to the user
+    if (commentToDelete.user.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to delete this comment',
+      });
+    }
+
+    // Store the deleted comment before removing
+    const deletedComment = commentToDelete.toObject(); // Convert to plain object before removing
+
+    // Remove the comment
+    announcement.comments.pull(commentId);
+    await announcement.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment deleted successfully',
+      deletedComment, // Return only the deleted comment
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while deleting comment',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+module.exports = {
+
+  likeAnnouncement,
+  unlikeAnnouncement,  // Newly added
+  addCommentToAnnouncement,
+  editComment,  // Newly added
+  deleteComment,  // Newly added
+};
+
 
