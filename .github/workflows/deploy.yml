@@ -16,7 +16,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: SHA256:kURMPlEtjP/Z7hUPn3z3hTxVRUH8n+87B/1SDAzv+80
+          ssh-private-key: SHA256:L1qh9hBRloYeraJQ+AHWAd/76TaqEbDtOI0ikrqe74M
       - name: Deploy to server
         run: |
           ssh root@162.241.149.204 "cd /srv/intranet/backend && git pull origin main"
