@@ -1,0 +1,22 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches:
+      - dev  # Change this to your default branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: SHA256:kURMPlEtjP/Z7hUPn3z3hTxVRUH8n+87B/1SDAzv+80
+      - name: Deploy to server
+        run: |
+          ssh root@162.241.149.204 "cd /srv/intranet/backend && git pull origin main"
