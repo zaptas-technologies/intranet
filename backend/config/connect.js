@@ -14,8 +14,11 @@ const config = {
   linkedin: {
     clientId: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-    redirectUri: process.env.LINKEDIN_REDIRECT_URI,
-    accessToken: process.env.LINKEDIN_ACCESS_TOKEN,
+    redirectUri: "http://localhost:3060/auth/linkedin/callback",
+    LINKEDIN_AUTH_URL: 'https://www.linkedin.com/oauth/v2/authorization',
+    LINKEDIN_TOKEN_URL: 'https://www.linkedin.com/oauth/v2/accessToken',
+    LINKEDIN_USERINFO_URL: 'https://api.linkedin.com/v2/me',
+    JWKS_URI: 'https://www.linkedin.com/oauth/openid/jwks',
   },
 
 };

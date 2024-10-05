@@ -1,23 +1,98 @@
-import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-function App() {
+const App = () => {
+  const [posts, setPosts] = useState([]);
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  // Redirect user to LinkedIn for authentication
+  const handleLinkedInLogin = () => {
+    window.location.href = 'http://localhost:3060/auth/linkedin';
+  };
+
+  // Fetch posts from the backend
+  const fetchPosts = async () => {
+    try {
+      const response = await axios.get('http://localhost:3060/fetch-posts');
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  // Like a post
+  const likePost = async (postId) => {
+    try {
+      const response = await axios.post('http://localhost:3060/like-post', {
+        postId,
+      });
+      console.log('Post liked:', response.data);
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
+  };
+
+  // Comment on a post
+  const commentOnPost = async (postId, comment) => {
+    try {
+      const response = await axios.post('http://localhost:3060/comment-post', {
+        postId,
+        comment,
+      });
+      console.log('Comment added:', response.data);
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    }
+  };
+
+  // Check if user is logged in and fetch posts
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const authResponse = await axios.get('http://localhost:3060/auth-status');
+        setLoggedIn(authResponse.data.loggedIn);
+
+        if (authResponse.data.loggedIn) {
+          // Fetch posts after user is authenticated
+          fetchPosts();
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (!loggedIn) {
+    return <button onClick={handleLinkedInLogin}>Login with LinkedIn</button>;
+  }
+
   return (
-    <div className="container mt-5">
-      <div className="row">
-        <div className="col-md-6 offset-md-3">
-          <div className="card">
-            <img src="https://via.placeholder.com/400x200" className="card-img-top" alt="..." />
-            <div className="card-body">
-              <h5 className="card-title">Card title</h5>
-              <p className="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-              <a href="#" className="btn btn-primary">Go somewhere</a>
-            </div>
+    <div>
+      <h1>Zaptas Technology Posts</h1>
+      {posts.length === 0 ? (
+        <p>No posts available</p>
+      ) : (
+        posts.map((post) => (
+          <div key={post.id} className="post">
+            <h3>{post.content}</h3>
+            <button onClick={() => likePost(post.id)}>Like</button>
+            <input
+              type="text"
+              placeholder="Add a comment"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  commentOnPost(post.id, e.target.value);
+                  e.target.value = '';
+                }
+              }}
+            />
           </div>
-        </div>
-      </div>
+        ))
+      )}
     </div>
   );
-}
+};
 
 export default App;

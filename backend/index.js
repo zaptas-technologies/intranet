@@ -4,13 +4,26 @@ const config = require('./config/connect');
 const announcementRoutes = require('./routes/announcementRoutes');
 const calendarRoutes = require('./routes/calendarRoutes');
 const userRoutes = require('./routes/auth');
+const linkedinRoutes = require('./routes/linkedinRoutes');
+const session = require('express-session');
+
 
 const app = express();
 
-// Middleware to parse JSON
+
 app.use(express.json());
 
+app.use(session({
+  secret: config.jwt.secret,
+  resave: false,
+  saveUninitialized: true,
+}));
+
+
+
+
 // Define routes
+app.use('/', linkedinRoutes);
 app.use('/v1', userRoutes);
 app.use('/v1/announcements', announcementRoutes);
 app.use('/v1/calendar', calendarRoutes);
