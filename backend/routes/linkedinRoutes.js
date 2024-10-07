@@ -8,6 +8,7 @@ router.get('/auth/linkedin', LinkedInController.redirectToLinkedIn);
 router.get('/auth/linkedin/callback', LinkedInController.handleLinkedInCallback);
 
 // Route to like a post
+router.get('/fetch', LinkedInController.fetchCompanyPosts);
 router.post('/like-post', LinkedInController.likePost);
 
 // Route to comment on a post

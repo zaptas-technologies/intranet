@@ -19,7 +19,7 @@ const LinkedInController = {
   redirectToLinkedIn: (req, res) => {
     try {
       // Redirect user to LinkedIn for authentication
-      const authorizationUrl = `${LINKEDIN_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email`;
+      const authorizationUrl = `${LINKEDIN_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email%20w_member_social%20r_organization_social%20w_organization_social`;
       res.redirect(authorizationUrl);
     } catch (error) {
       // console.error('Error during LinkedIn authorization redirection:', error);
@@ -47,7 +47,7 @@ const LinkedInController = {
       });
 
       const { access_token, id_token } = tokenResponse.data;
-      console.log(tokenResponse.data,"Dddddddddddddassc")
+
 
       if (!access_token || !id_token) {
         throw new Error('Missing access token or ID token in response');
@@ -55,35 +55,10 @@ const LinkedInController = {
 
       // Verify the ID token
       const decodedToken = await LinkedInController.verifyIdToken(id_token);
-      console.log(decodedToken,"D")
 
 
-      const searchOrganizations = async (accessToken, vanityName) => {
-        try {
-            const response = await axios.get(`https://api.linkedin.com/v2/organizations?q=vanityName&vanityName=${vanityName}`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                    'X-Restli-Protocol-Version': '2.0.0',
-                },
-            });
-    
-            console.log('Search Response:', response.data);
-    
-            // Extract organization details
-            const organizations = response.data.elements || [];
-            if (organizations.length > 0) {
-                organizations.forEach(org => {
-                    console.log('Organization URN:', org.id); // This is the organization URN
-                    console.log('Vanity Name:', org.vanityName); // This is the vanity name
-                });
-            } else {
-                console.log('No organizations found for the given vanity name.');
-            }
-        } catch (error) {
-            console.error('Error fetching organization data:', error.response ? error.response.data : error.message);
-        }
-    };
-    searchOrganizations(access_token,'zaptas-technologies-pvt.-ltd.')
+
+
       // Fetch Zaptas Technology posts
       const posts = await LinkedInController.fetchCompanyPosts(access_token);
 
@@ -129,52 +104,77 @@ const LinkedInController = {
     });
   },
 
-  getOrganizationURN:async (access_token) => {
+  getOrganizationURN: async (access_token) => {
     try {
-        // Call the organizations endpoint to find Zaptas Pvt Ltd
-        const response = await axios.get('https://api.linkedin.com/v2/organizations?q=vanityName&vanityName=zaptas', {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-                'X-Restli-Protocol-Version': '2.0.0',
-            },
-        });
-
-        // Log the organization data
-        const organizations = response.data;
-        console.log('Organizations:', organizations);
-
-        // Assuming the URN is in the response, extract it
-        if (organizations.elements && organizations.elements.length > 0) {
-            const urn = organizations.elements[0].urn; // Get the URN of the first result
-            console.log('Zaptas Pvt Ltd URN:', urn);
-            return urn;
-        } else {
-            console.log('No organizations found with the name Zaptas.');
-        }
+      // Call the userinfo endpoint to get the user (person) URN
+      const response = await axios.get(LINKEDIN_USERINFO_URL, {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Check if the response has data and the `sub` field exists
+      if (response.data && response.data.sub) {
+        return response.data.sub; // Person URN
+      } else {
+        throw new Error('Unexpected response structure: "sub" field missing');
+      }
+  
     } catch (error) {
-        console.error('Error fetching organization data:', error.response ? error.response.data : error.message);
+      // Enhanced error handling
+      if (error.response) {
+        // The request was made and the server responded with a status code outside of the 2xx range
+        console.error('Error response from API:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        });
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received from LinkedIn API:', error.request);
+      } else {
+        // Something happened in setting up the request
+        console.error('Error setting up request:', error.message);
+      }
+  
+      // Provide a more user-friendly message for the consumer of the function
+      throw new Error('Failed to retrieve the Person URN from LinkedIn');
     }
   },
 
   // Fetch Zaptas Technology posts (using organization's URN)
-  fetchCompanyPosts: async (access_token) => {
+  fetchCompanyPosts: async (req,res) => {
     try {
-      const organizationURN = await LinkedInController.getOrganizationURN(access_token);
-      // console.log(organizationURN,"Dddddddddd")
-
-      const response = await axios.get(`https://api.linkedin.com/v2/shares?q=owners&owners=${organizationURN}`, {
+      // You don't need to redefine access_token if it's already provided
+      const access_token = config.linkedin.access_token;
+      console.log(access_token);
+  
+      // Ensure you prepend the correct prefix
+      const organizationId = `urn:li:organization:7936008`; // No need for separate variable if it's constant
+  
+      const viewContext = 'AUTHOR'; // Specify the view context
+  
+      // Make the API call to get the posts by organization URN
+      const response = await axios.get(`https://api.linkedin.com/rest/posts?author=${encodeURIComponent(organizationId)}&q=author&count=10&sortBy=LAST_MODIFIED`, {
         headers: {
           Authorization: `Bearer ${access_token}`,
-          'X-Restli-Protocol-Version': '2.0.0',
-        },
+          'Content-Type': 'application/json',
+          'LinkedIn-Version': '202409'  // Ensure you are using a valid version
+        }
       });
-
-      return response.data.elements;
+  
+      // console.log(response.data);
+  
+      return res.send(response.data); 
     } catch (error) {
-      // console.error('Error fetching company posts:', error);
-      throw new Error('Failed to fetch company posts');
+      console.error('Failed to retrieve posts:', error.response?.data || error.message);
+      throw new Error('Error retrieving posts');
     }
   },
+  
+
+  
   likePost: async (req, res) => {
     const { access_token, postId } = req.body;
     const actor = 'urn:li:person:YOUR_PERSON_URN'; // Replace with actual person's URN

@@ -3,18 +3,12 @@ import axios from 'axios';
 
 const App = () => {
   const [posts, setPosts] = useState([]);
-  const [loggedIn, setLoggedIn] = useState(false);
-
-  // Redirect user to LinkedIn for authentication
-  const handleLinkedInLogin = () => {
-    window.location.href = 'http://localhost:3060/auth/linkedin';
-  };
 
   // Fetch posts from the backend
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:3060/fetch-posts');
-      setPosts(response.data.posts);
+      const response = await axios.get('http://localhost:3060/fetch');
+      setPosts(response.data.elements); // Update to match the structure of your fetched data
     } catch (error) {
       console.error('Error fetching posts:', error);
     }
@@ -45,53 +39,48 @@ const App = () => {
     }
   };
 
-  // Check if user is logged in and fetch posts
+  // Fetch posts when the component mounts
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const authResponse = await axios.get('http://localhost:3060/auth-status');
-        setLoggedIn(authResponse.data.loggedIn);
-
-        if (authResponse.data.loggedIn) {
-          // Fetch posts after user is authenticated
-          fetchPosts();
-        }
-      } catch (error) {
-        console.error('Error checking auth status:', error);
-      }
-    };
-
-    checkAuth();
+    fetchPosts();
   }, []);
-
-  if (!loggedIn) {
-    return <button onClick={handleLinkedInLogin}>Login with LinkedIn</button>;
-  }
 
   return (
     <div>
-      <h1>Zaptas Technology Posts</h1>
-      {posts.length === 0 ? (
-        <p>No posts available</p>
-      ) : (
-        posts.map((post) => (
-          <div key={post.id} className="post">
-            <h3>{post.content}</h3>
-            <button onClick={() => likePost(post.id)}>Like</button>
+    <h1>Zaptas Technology Posts</h1>
+    
+    {posts && posts.elements && posts.elements.length > 0 ? (
+      posts.elements.map((post) => {
+        const postId = post.id.split(':').pop(); // Extracting the actual ID
+  
+        return (
+          <div key={postId} className="post">
+            <h3>{post.commentary}</h3>
+            {post.content.media && (
+              <img
+                src={`https://media.licdn.com/media/${post.content.media.id}.jpg`} // Adjust the URL if necessary
+                alt={post.content.media.altText}
+                style={{ maxWidth: '100%', height: 'auto' }}
+              />
+            )}
+            <button onClick={() => likePost(postId)}>Like</button>
             <input
               type="text"
               placeholder="Add a comment"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  commentOnPost(post.id, e.target.value);
+                  commentOnPost(postId, e.target.value);
                   e.target.value = '';
                 }
               }}
             />
           </div>
-        ))
-      )}
-    </div>
+        );
+      })
+    ) : (
+      <p>No posts available.</p>
+    )}
+  </div>
+  
   );
 };
 
