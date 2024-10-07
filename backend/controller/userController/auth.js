@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken'); // For generating tokens
+
 const User = require('../../model/user');
 const { generateToken } = require('../../Middleware/jwtAuthorization');
 const sendResponse = require('../../utility/responseHelper');

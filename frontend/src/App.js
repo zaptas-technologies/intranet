@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import './App.css'; // Make sure to import the CSS file
 
 const App = () => {
   const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Fetch posts from the backend
   const fetchPosts = async () => {
     try {
       const response = await axios.get('http://localhost:3060/fetch');
-      setPosts(response.data.elements); // Update to match the structure of your fetched data
+      setPosts(response.data.data.posts);
     } catch (error) {
       console.error('Error fetching posts:', error);
+      setError('Failed to load posts.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,41 +52,41 @@ const App = () => {
 
   return (
     <div>
-    <h1>Zaptas Technology Posts</h1>
-    
-    {posts && posts.elements && posts.elements.length > 0 ? (
-      posts.elements.map((post) => {
-        const postId = post.id.split(':').pop(); // Extracting the actual ID
-  
-        return (
-          <div key={postId} className="post">
-            <h3>{post.commentary}</h3>
-            {post.content.media && (
-              <img
-                src={`https://media.licdn.com/media/${post.content.media.id}.jpg`} // Adjust the URL if necessary
-                alt={post.content.media.altText}
-                style={{ maxWidth: '100%', height: 'auto' }}
+      <h1>Zaptas Technology Posts</h1>
+      {loading ? (
+        <p>Loading posts...</p>
+      ) : error ? (
+        <p>{error}</p>
+      ) : posts && posts.length > 0 ? (
+        <div className="grid">
+          {posts.map((post) => (
+            <div key={post.id} className="post">
+              <h9>{post.commentary}</h9>
+              {post.imageUrl && (
+                <img
+                  src={post.imageUrl}
+                  alt="Post visual content"
+                  className="post-image"
+                />
+              )}
+              <button onClick={() => likePost(post.id)}>Like</button>
+              <input
+                type="text"
+                placeholder="Add a comment"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim()) {
+                    commentOnPost(post.id, e.target.value);
+                    e.target.value = ''; // Clear the input field
+                  }
+                }}
               />
-            )}
-            <button onClick={() => likePost(postId)}>Like</button>
-            <input
-              type="text"
-              placeholder="Add a comment"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  commentOnPost(postId, e.target.value);
-                  e.target.value = '';
-                }
-              }}
-            />
-          </div>
-        );
-      })
-    ) : (
-      <p>No posts available.</p>
-    )}
-  </div>
-  
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p>No posts available.</p>
+      )}
+    </div>
   );
 };
 

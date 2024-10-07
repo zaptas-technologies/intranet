@@ -2,28 +2,27 @@ const axios = require('axios');
 const jwksClient = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 const config = require('../../config/connect');
-require('dotenv').config();
+const { sendResponse, purifyText,apiCall } = require('../../utility/responseHelper');
+
 
 const LINKEDIN_AUTH_URL = config.linkedin.LINKEDIN_AUTH_URL;
 const LINKEDIN_TOKEN_URL = config.linkedin.LINKEDIN_TOKEN_URL;
-const LINKEDIN_USERINFO_URL = config.linkedin.LINKEDIN_USERINFO_URL;
 const JWKS_URI = config.linkedin.JWKS_URI;
-
+const retrive_posts = config.linkedin.retrive_posts;
 const CLIENT_ID = config.linkedin.clientId;
 const CLIENT_SECRET = config.linkedin.clientSecret;
 const REDIRECT_URI = config.linkedin.redirectUri;
-
-const ZAPTAS_ORG_URN = 'urn:li:organization:YOUR_ORG_URN'; // Replace with actual organization URN
+const ORGANIZATION_ID = config.linkedin.ORGANIZATION_ID;
+const SCOPE = config.linkedin.REACT_APP_LINKEDIN_SCOPE;
+const ZAPTAS_ORG_URN = `urn:li:organization:${ORGANIZATION_ID}`;
 
 const LinkedInController = {
   redirectToLinkedIn: (req, res) => {
     try {
-      // Redirect user to LinkedIn for authentication
-      const authorizationUrl = `${LINKEDIN_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=openid%20profile%20email%20w_member_social%20r_organization_social%20w_organization_social`;
+      const authorizationUrl = `${LINKEDIN_AUTH_URL}?response_type=code&client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&scope=${encodeURIComponent(SCOPE)}`;
       res.redirect(authorizationUrl);
     } catch (error) {
-      // console.error('Error during LinkedIn authorization redirection:', error);
-      res.status(500).json({ error: 'Failed to redirect to LinkedIn for authentication' });
+      return sendResponse(res, 500, false, 'Failed to redirect to LinkedIn for authentication', null, error.message);
     }
   },
 
@@ -31,50 +30,36 @@ const LinkedInController = {
     const { code } = req.query;
 
     if (!code) {
-      return res.status(400).json({ error: 'No authorization code provided' });
+      return sendResponse(res, 400, false, 'No authorization code provided');
     }
 
     try {
-      // Exchange authorization code for access token and ID token
-      const tokenResponse = await axios.post(LINKEDIN_TOKEN_URL, new URLSearchParams({
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: REDIRECT_URI,
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-      }), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      });
+      const tokenResponse = await apiCall(
+        'POST',
+        LINKEDIN_TOKEN_URL,
+        { 'Content-Type': 'application/x-www-form-urlencoded' },
+        new URLSearchParams({
+          grant_type: 'authorization_code',
+          code: code,
+          redirect_uri: REDIRECT_URI,
+          client_id: CLIENT_ID,
+          client_secret: CLIENT_SECRET,
+        }).toString(),
+        res
+      );
 
-      const { access_token, id_token } = tokenResponse.data;
-
+      const { access_token, id_token } = tokenResponse;
 
       if (!access_token || !id_token) {
         throw new Error('Missing access token or ID token in response');
       }
 
-      // Verify the ID token
       const decodedToken = await LinkedInController.verifyIdToken(id_token);
-
-
-
-
-      // Fetch Zaptas Technology posts
-      const posts = await LinkedInController.fetchCompanyPosts(access_token);
-
-      // Return posts as JSON
-      res.json({ user: decodedToken, posts });
+      return sendResponse(res, 200, true, 'Authentication successful', { user: decodedToken });
 
     } catch (error) {
-      // console.error('Error during LinkedIn OAuth callback flow:', error);
-
-      if (error.response) {
-        res.status(error.response.status).json({
-          error: error.response.data.error_description || 'Error during token exchange',
-        });
-      } else {
-        res.status(500).json({ error: 'Authentication failed' });
-      }
+      const errorMessage = error.response?.data?.error_description || 'Error during token exchange';
+      return sendResponse(res, error.response?.status || 500, false, 'Authentication failed', null, errorMessage);
     }
   },
 
@@ -104,124 +89,105 @@ const LinkedInController = {
     });
   },
 
-  getOrganizationURN: async (access_token) => {
+  fetchCompanyPosts: async (req, res) => {
     try {
-      // Call the userinfo endpoint to get the user (person) URN
-      const response = await axios.get(LINKEDIN_USERINFO_URL, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-  
-      // Check if the response has data and the `sub` field exists
-      if (response.data && response.data.sub) {
-        return response.data.sub; // Person URN
-      } else {
-        throw new Error('Unexpected response structure: "sub" field missing');
-      }
-  
-    } catch (error) {
-      // Enhanced error handling
-      if (error.response) {
-        // The request was made and the server responded with a status code outside of the 2xx range
-        console.error('Error response from API:', {
-          status: error.response.status,
-          statusText: error.response.statusText,
-          data: error.response.data,
-        });
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('No response received from LinkedIn API:', error.request);
-      } else {
-        // Something happened in setting up the request
-        console.error('Error setting up request:', error.message);
-      }
-  
-      // Provide a more user-friendly message for the consumer of the function
-      throw new Error('Failed to retrieve the Person URN from LinkedIn');
-    }
-  },
-
-  // Fetch Zaptas Technology posts (using organization's URN)
-  fetchCompanyPosts: async (req,res) => {
-    try {
-      // You don't need to redefine access_token if it's already provided
       const access_token = config.linkedin.access_token;
-      console.log(access_token);
-  
-      // Ensure you prepend the correct prefix
-      const organizationId = `urn:li:organization:7936008`; // No need for separate variable if it's constant
-  
-      const viewContext = 'AUTHOR'; // Specify the view context
-  
-      // Make the API call to get the posts by organization URN
-      const response = await axios.get(`https://api.linkedin.com/rest/posts?author=${encodeURIComponent(organizationId)}&q=author&count=10&sortBy=LAST_MODIFIED`, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'Content-Type': 'application/json',
-          'LinkedIn-Version': '202409'  // Ensure you are using a valid version
-        }
-      });
-  
-      // console.log(response.data);
-  
-      return res.send(response.data); 
+      const url = `${retrive_posts}?author=${encodeURIComponent(ZAPTAS_ORG_URN)}&q=author&count=10&sortBy=LAST_MODIFIED`;
+
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        'Content-Type': 'application/json',
+        'LinkedIn-Version': '202409',
+      };
+
+      const response = await apiCall('GET', url, headers, null, res);
+
+      let structuredPosts = [];
+      for (const post of response.elements) {
+        structuredPosts.push({
+          id: post.id,
+          commentary: purifyText(post.commentary),
+          publishedAt: post.publishedAt,
+          visibility: post.visibility,
+          imageUrl: post.content?.media?.id
+            ? await LinkedInController.fetchImageUrl(post.content.media.id, access_token)
+            : null,
+        });
+      }
+
+      return sendResponse(res, 200, true, 'fetched successfully', { posts: structuredPosts });
+
     } catch (error) {
-      console.error('Failed to retrieve posts:', error.response?.data || error.message);
-      throw new Error('Error retrieving posts');
+      console.error('Failed to retrieve posts:', error.message);
+      // Error handling is already done in apiCall
     }
   },
-  
 
-  
+  fetchImageUrl :async (imageId, accessToken) => {
+    const url = `https://api.linkedin.com/rest/images/${encodeURIComponent(imageId)}`;
+    const headers = {
+        Authorization: `Bearer ${accessToken}`,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'LinkedIn-Version':'202409'
+    };
+
+    const response = await axios.get(url, { headers });
+    return response.data.value; // Adjust this based on the actual response structure
+},
+
   likePost: async (req, res) => {
     const { access_token, postId } = req.body;
     const actor = 'urn:li:person:YOUR_PERSON_URN'; // Replace with actual person's URN
+
     try {
-      await axios.post('https://api.linkedin.com/v2/reactions', {
+      const url = 'https://api.linkedin.com/v2/reactions';
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'Content-Type': 'application/json',
+      };
+
+      const data = {
         actor: actor,
         object: postId,
-        reactionType: 'LIKE'
-      }, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'X-Restli-Protocol-Version': '2.0.0',
-          'Content-Type': 'application/json'
-        }
-      });
+        reactionType: 'LIKE',
+      };
 
-      res.json({ success: true, message: 'Post liked successfully' });
+      await apiCall('POST', url, headers, data, res);
+      return sendResponse(res, 200, true, 'Post liked successfully');
+
     } catch (error) {
-      // console.error('Error liking post:', error);
-      res.status(500).json({ error: 'Failed to like post' });
+      // Error handling is already done in apiCall
     }
   },
 
   commentOnPost: async (req, res) => {
     const { access_token, postId, comment } = req.body;
     const actor = 'urn:li:person:YOUR_PERSON_URN'; // Replace with actual person's URN
+
     try {
-      await axios.post('https://api.linkedin.com/v2/comments', {
+      const url = 'https://api.linkedin.com/v2/comments';
+      const headers = {
+        Authorization: `Bearer ${access_token}`,
+        'X-Restli-Protocol-Version': '2.0.0',
+        'Content-Type': 'application/json',
+      };
+
+      const data = {
         actor: actor,
         object: postId,
         message: {
-          text: comment
-        }
-      }, {
-        headers: {
-          Authorization: `Bearer ${access_token}`,
-          'X-Restli-Protocol-Version': '2.0.0',
-          'Content-Type': 'application/json'
-        }
-      });
+          text: comment,
+        },
+      };
 
-      res.json({ success: true, message: 'Comment added successfully' });
+      await apiCall('POST', url, headers, data, res);
+      return sendResponse(res, 200, true, 'Comment added successfully');
+
     } catch (error) {
-      // console.error('Error commenting on post:', error);
-      res.status(500).json({ error: 'Failed to comment on post' });
+      // Error handling is already done in apiCall
     }
-  }
+  },
 };
 
 module.exports = LinkedInController;

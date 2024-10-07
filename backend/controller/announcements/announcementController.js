@@ -1,7 +1,7 @@
 const Announcement = require('../../model/Announcement'); // Assuming the model file path is correct
 const mongoose = require('mongoose');
 const User = require('../../model/user');
-const sendResponse = require('../../utility/responseHelper');
+const {sendResponse} = require('../../utility/responseHelper');
 
 // Get latest announcements
 const getLatestAnnouncements = async (req, res) => {

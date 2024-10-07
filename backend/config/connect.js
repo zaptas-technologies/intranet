@@ -15,11 +15,13 @@ const config = {
     clientId: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
     access_token:process.env.LINKEDIN_ACCESS_TOKEN,
+    ORGANIZATION_ID:process.env.LINKEDIN_ORGANIZATION_ID,
+    retrive_posts:"https://api.linkedin.com/rest/posts",
     redirectUri: "http://localhost:3060/auth/linkedin/callback",
     LINKEDIN_AUTH_URL: 'https://www.linkedin.com/oauth/v2/authorization',
     LINKEDIN_TOKEN_URL: 'https://www.linkedin.com/oauth/v2/accessToken',
-    LINKEDIN_USERINFO_URL: 'https://api.linkedin.com/v2/userinfo',
     JWKS_URI: 'https://www.linkedin.com/oauth/openid/jwks',
+    REACT_APP_LINKEDIN_SCOPE:process.env.REACT_APP_LINKEDIN_SCOPE
   },
 
 };

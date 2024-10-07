@@ -1,6 +1,6 @@
 const Announcement = require('../../model/Announcement'); // Assuming the model file path is correct
 const mongoose = require('mongoose');
-const sendResponse = require('../../utility/responseHelper');
+const {sendResponse} = require('../../utility/responseHelper');
 
 // Unlike an announcement
 const likeAnnouncement = async (req, res) => {

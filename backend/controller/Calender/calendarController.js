@@ -1,6 +1,6 @@
 const Holiday = require('../../model/HolidaySchema');
 const Event = require('../../model/EventSchema');
-const sendResponse = require('../../utility/responseHelper');
+const {sendResponse} = require('../../utility/responseHelper');
 
 // Create a new holiday
 exports.createHoliday = async (req, res) => {
