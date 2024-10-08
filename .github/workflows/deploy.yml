@@ -16,7 +16,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key:  SHA256:L1qh9hBRloYeraJQ+AHWAd/76TaqEbDtOI0ikrqe74M  # Store your private key in GitHub Secrets
+          ssh-private-key:  SHA256:fNDJHVwgTT4qFPyq+AgmtqeKovYhbUKXmaPfNKO7CnM  # Store your private key in GitHub Secrets
 
       - name: Deploy to server
         run: |
