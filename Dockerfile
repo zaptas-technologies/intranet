@@ -1,20 +1,20 @@
-# Use the official Node.js 20.17.0 image
+# Use the official Node.js v20.17.0 image
 FROM node:20.17.0
 
-# Set the working directory inside the container
-WORKDIR /backed
+# Set the working directory
+WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json from the backend folder to the working directory
-COPY backend/package*.json ./
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of your application code to the working directory
-COPY backend/ .
+# Copy the rest of the application code
+COPY . .
 
-# Expose the port your application runs on
-EXPOSE 3060
+# Expose the port your app runs on
+EXPOSE 3070
 
-# Command to run your application
-CMD ["node", "index.js"]
+# Command to run your application (specifying the index.js entry point)
+CMD [ "node", "intranet/backend/index.js" ]
