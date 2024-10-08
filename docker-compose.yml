@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3070:3070"  # Map host port 3070 to container port 3070
+      - "3060:3060"  # Map host port 3070 to container port 3070
     restart: always
     environment:
       NODE_ENV: production  # Set environment variables as needed

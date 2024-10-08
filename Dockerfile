@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the port your app runs on
-EXPOSE 3070
+EXPOSE 3060
 
 # Command to run your application (specifying the index.js entry point)
 CMD [ "node", "intranet/backend/index.js" ]
