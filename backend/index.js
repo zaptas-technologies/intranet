@@ -6,7 +6,7 @@ const calendarRoutes = require('./routes/calendarRoutes');
 const userRoutes = require('./routes/auth');
 const linkedinRoutes = require('./routes/linkedinRoutes');
 const session = require('express-session');
-
+const cors = require('cors');
 
 const app = express();
 

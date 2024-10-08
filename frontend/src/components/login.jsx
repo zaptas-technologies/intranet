@@ -19,7 +19,7 @@ const Login = () => {
 
   const handleLinkedInLogin = () => {
 
-    axios.get("http://162.241.149.204:3060/auth/linkedin").then(({ data }) => {
+    axios.get("http://localhost:3060/auth/linkedin").then(({ data }) => {
       console.log(data)
     })
   };
