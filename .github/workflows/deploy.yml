@@ -24,8 +24,8 @@ jobs:
             # Navigate to the project directory
             cd /srv/intranet/backend || exit
             
-            # Pull the latest changes
-            git pull origin main
+            # Pull the latest changes from the dev branch
+            git pull origin dev
             
             # Install dependencies (if you're using npm)
             npm install
