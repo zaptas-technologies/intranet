@@ -16,22 +16,22 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Store your private key in GitHub Secrets
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: Deploy to server
         run: |
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
             # Navigate to the project directory
-            cd /srv/intranet/backend || exit
+            cd /srv/intranet || exit
             
             # Pull the latest changes from the dev branch
             git pull origin dev
             
-            # Install dependencies (if you're using npm)
-            npm install
+            # Build the Docker image
+            docker-compose build
             
-            # Restart your application (if you're using PM2, for example)
-            pm2 restart all  # or specify your app name, e.g., pm2 restart my-app
+            # Start or restart the Docker container
+            docker-compose up -d
             
             # Optionally, run any migrations or build steps
             # npm run build  # Uncomment if needed
