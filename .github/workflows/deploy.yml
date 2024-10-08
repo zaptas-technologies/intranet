@@ -16,7 +16,23 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key: SHA256:L1qh9hBRloYeraJQ+AHWAd/76TaqEbDtOI0ikrqe74M
+          ssh-private-key:  SHA256:L1qh9hBRloYeraJQ+AHWAd/76TaqEbDtOI0ikrqe74M  # Store your private key in GitHub Secrets
+
       - name: Deploy to server
         run: |
-          ssh root@162.241.149.204 "cd /srv/intranet/backend && git pull origin main"
+          ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
+            # Navigate to the project directory
+            cd /srv/intranet/backend || exit
+            
+            # Pull the latest changes
+            git pull origin main
+            
+            # Install dependencies (if you're using npm)
+            npm install
+            
+            # Restart your application (if you're using PM2, for example)
+            pm2 restart all  # or specify your app name, e.g., pm2 restart my-app
+            
+            # Optionally, run any migrations or build steps
+            # npm run build  # Uncomment if needed
+          EOF

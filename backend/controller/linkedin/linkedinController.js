@@ -132,7 +132,7 @@ const LinkedInController = {
     };
 
     const response = await axios.get(url, { headers });
-    return response.data.value; // Adjust this based on the actual response structure
+    return response.data.downloadUrl; // Adjust this based on the actual response structure
 },
 
   likePost: async (req, res) => {

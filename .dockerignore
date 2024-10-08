@@ -1,0 +1,9 @@
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+# Ignore node_modules in the backend
+/backed/node_modules
+# Ignore node_modules in the frontend
+/frontend/node_modules
+# Ignore npm debug log
