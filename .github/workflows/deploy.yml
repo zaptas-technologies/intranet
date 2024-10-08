@@ -22,17 +22,17 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
             # Navigate to the project directory
-            cd /srv/intranet || exit
+            cd /srv/intranet/backend || exit
             
             # Pull the latest changes from the dev branch
             git pull origin dev
             
-            # Build Docker images
-            docker-compose build
+            # Install dependencies (if you're using npm)
+            npm install
             
-            # Restart your application
-            docker-compose up -d  # This starts or restarts the containers
+            # Restart your application (if you're using PM2, for example)
+            pm2 restart all  # or specify your app name, e.g., pm2 restart my-app
             
             # Optionally, run any migrations or build steps
-            # docker-compose exec <service_name> npm run build  # Uncomment if needed
+            # npm run build  # Uncomment if needed
           EOF
