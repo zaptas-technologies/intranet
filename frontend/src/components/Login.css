@@ -1,0 +1,42 @@
+/* src/Login.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    font-family: Arial, sans-serif;
+}
+
+.login-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 40px;
+    width: 300px;
+    margin: auto;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.linkedin-button {
+    background-color: #0077b5; /* LinkedIn blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.linkedin-button:hover {
+    background-color: #005582; /* Darker LinkedIn blue */
+}
