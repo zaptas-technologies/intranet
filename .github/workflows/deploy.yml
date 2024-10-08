@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -15,7 +16,7 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
-          ssh-private-key:  SHA256:fNDJHVwgTT4qFPyq+AgmtqeKovYhbUKXmaPfNKO7CnM  # Store your private key in GitHub Secrets
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Store your private key in GitHub Secrets
 
       - name: Deploy to server
         run: |
