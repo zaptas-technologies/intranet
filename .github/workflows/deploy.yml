@@ -25,22 +25,22 @@ jobs:
           npm install
           npm run build
 
-      - name: Deploy to server
+      - name: Deploy backend to server
         run: |
           # Deploy backend
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
-            cd /var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/backend || exit
+            cd /var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/backend || { echo "Directory not found"; exit 1; }
             git pull origin dev
             npm install
-            pm2 restart all
+            pm2 restart all || { echo "PM2 failed to restart"; exit 1; }
           EOF
 
       # Step to deploy the frontend build files
       - name: Deploy frontend build to server
         run: |
-          rsync -avz --delete frontend/build/ root@162.241.149.204:/var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/frontend/
+          rsync -avz --delete frontend/build/ root@162.241.149.204:/var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/frontend/ || { echo "Rsync failed"; exit 1; }
           
           # Restart Nginx if necessary
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
-            systemctl restart nginx
+            systemctl restart nginx || { echo "Nginx failed to restart"; exit 1; }
           EOF
