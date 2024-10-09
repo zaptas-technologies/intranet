@@ -3,7 +3,7 @@ name: Deploy to Server
 on:
   push:
     branches:
-      - dev 
+      - dev
 
 jobs:
   deploy:
@@ -18,21 +18,39 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}  # Store your private key in GitHub Secrets
 
+      - name: Build React app
+        run: |
+          cd intranet/frontend
+          npm install
+          npm run build
+
       - name: Deploy to server
         run: |
+          # Backend deployment
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
-            # Navigate to the project directory
+            # Navigate to the backend project directory
             cd /srv/intranet/backend || exit
             
             # Pull the latest changes from the dev branch
             git pull origin dev
             
-            # Install dependencies (if you're using npm)
+            # Install backend dependencies
             npm install
             
-            # Restart your application (if you're using PM2, for example)
-            pm2 restart all  # or specify your app name, e.g., pm2 restart my-app
+            # Restart your backend application (if you're using PM2)
+            pm2 restart all  # or specify your app name, e.g., pm2 restart backend-app
             
             # Optionally, run any migrations or build steps
             # npm run build  # Uncomment if needed
+          EOF
+
+      - name: Deploy frontend build to server
+        run: |
+          # Sync the build folder to the frontend directory on the server
+          rsync -avz --delete intranet/frontend/build/ root@162.241.149.204:/srv/intranet/frontend/
+
+          # Optionally restart Nginx or the server if necessary
+          ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
+            # Restart Nginx to pick up new build (if using Nginx)
+            systemctl restart nginx
           EOF
