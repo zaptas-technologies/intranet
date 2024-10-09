@@ -29,7 +29,7 @@ jobs:
         run: |
           # Deploy backend
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
-            cd /srv/intranet/backend || exit
+            cd /var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/backend || exit
             git pull origin dev
             npm install
             pm2 restart all
@@ -38,7 +38,7 @@ jobs:
       # Step to deploy the frontend build files
       - name: Deploy frontend build to server
         run: |
-          rsync -avz --delete frontend/build/ root@162.241.149.204:/srv/intranet/frontend/
+          rsync -avz --delete frontend/build/ root@162.241.149.204:/var/www/vhosts/zaptas.in/intranet2.zaptas.in/garware/frontend/
           
           # Restart Nginx if necessary
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'

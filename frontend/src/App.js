@@ -7,7 +7,7 @@ import { Posts } from './components/Posts';
 
 const App = () => {
   return (
-    <Router>
+    <Router basename="/garware/frontend">
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/posts" element={<Posts />} />
