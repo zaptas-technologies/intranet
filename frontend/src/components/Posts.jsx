@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import './Posts.css'; // Import the CSS file
 
@@ -8,8 +8,8 @@ export const Posts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch posts from the backend
-  const fetchPosts = async () => {
+  // Memoized fetchPosts function
+  const fetchPosts = useCallback(async () => {
     try {
       const response = await axios.get(`http://162.241.149.204:3060/fetch?access_token=${accessToken}`);
       setPosts(response.data.data.posts);
@@ -19,7 +19,7 @@ export const Posts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [accessToken]); // Make sure 'accessToken' is in the dependency array
 
   // Like a post
   const likePost = async (postId) => {
@@ -49,7 +49,7 @@ export const Posts = () => {
   // Fetch posts when the component mounts
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]); // Now 'fetchPosts' is included in the dependency array
 
   return (
     <div>
