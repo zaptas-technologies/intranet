@@ -8,7 +8,7 @@
 //     {
 //         clientID: config.linkedin.clientId,
 //         clientSecret: config.linkedin.clientSecret,
-//         callbackURL: 'http://localhost:3060/auth/linkedin/callback',
+//         callbackURL: 'http://162.241.149.204:3060/auth/linkedin/callback',
 //       scope: ['email', 'profile', 'openid'],
 //       state: true,
 //     },
@@ -30,7 +30,7 @@ passport.use(
     {
       clientID: '868f0az3l4fldl',
       clientSecret: 'WPL_AP1.DFuj8uvIAZbsMwL0./8Lxew==',
-      callbackURL: 'http://localhost:3060/auth/linkedin/callback',
+      callbackURL: 'http://162.241.149.204:3060/auth/linkedin/callback',
     //   scope: ['email', 'profile', 'openid','w_member_social'],
       scope: ['r_emailaddress', 'r_basicprofile'],
       state: true,

@@ -2,7 +2,7 @@ const axios = require('axios');
 const jwksClient = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 const config = require('../../config/connect');
-const { sendResponse, purifyText,apiCall } = require('../../utility/responseHelper');
+const { sendResponse, purifyText, apiCall } = require('../../utility/responseHelper');
 
 
 const LINKEDIN_AUTH_URL = config.linkedin.LINKEDIN_AUTH_URL;
@@ -55,13 +55,37 @@ const LinkedInController = {
       }
 
       const decodedToken = await LinkedInController.verifyIdToken(id_token);
-      return sendResponse(res, 200, true, 'Authentication successful', { user: decodedToken });
+      res.redirect(`http://162.241.149.204:3000?token=${access_token}`);
+      // return sendResponse(res, 200, true, 'Authentication successful', { user: decodedToken });
 
     } catch (error) {
       const errorMessage = error.response?.data?.error_description || 'Error during token exchange';
       return sendResponse(res, error.response?.status || 500, false, 'Authentication failed', null, errorMessage);
     }
+  }, userInfo: async (req, res) => {
+    try {
+      const accessToken = req.headers.authorization.split(' ')[1]; // Get token from 'Authorization' header
+
+      // Define the LinkedIn user profile API endpoint
+      const url = 'https://api.linkedin.com/v2/userinfo';
+      // console.log(accessToken)
+
+      // Make a request to LinkedIn API to fetch user details
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+          // 'LinkedIn-Version': '202409', // Adjust as per LinkedIn's API versioning
+        },
+      });
+
+      return sendResponse(res, 200, true, 'User information fetched successfully', response.data);
+    } catch (error) {
+      console.error('Failed to fetch user info:', error.message);
+      return sendResponse(res, 500, false, 'Failed to fetch user information', null);
+    }
   },
+
 
   verifyIdToken: async (idToken) => {
     const client = jwksClient({
@@ -123,17 +147,17 @@ const LinkedInController = {
     }
   },
 
-  fetchImageUrl :async (imageId, accessToken) => {
+  fetchImageUrl: async (imageId, accessToken) => {
     const url = `https://api.linkedin.com/rest/images/${encodeURIComponent(imageId)}`;
     const headers = {
-        Authorization: `Bearer ${accessToken}`,
-        'X-Restli-Protocol-Version': '2.0.0',
-        'LinkedIn-Version':'202409'
+      Authorization: `Bearer ${accessToken}`,
+      'X-Restli-Protocol-Version': '2.0.0',
+      'LinkedIn-Version': '202409'
     };
 
     const response = await axios.get(url, { headers });
     return response.data.downloadUrl; // Adjust this based on the actual response structure
-},
+  },
 
   likePost: async (req, res) => {
     const { access_token, postId } = req.body;
