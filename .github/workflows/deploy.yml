@@ -13,21 +13,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files for debugging
+        run: |
+          # List all files and directories to check the structure
+          ls -la
+          ls -la intranet/frontend  # This will help confirm if the directory exists
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # Step to build the frontend
       - name: Build React app
-        working-directory: intranet/frontend
         run: |
+          # Ensure the directory path is correct, adjust if necessary
+          cd intranet/frontend
           npm install
           npm run build
 
       - name: Deploy to server
         run: |
-          # Deploy backend
+          # Backend deployment
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
             cd /srv/intranet/backend || exit
             git pull origin dev
@@ -35,12 +41,12 @@ jobs:
             pm2 restart all
           EOF
 
-      # Step to deploy the frontend build files
       - name: Deploy frontend build to server
         run: |
+          # Sync the build folder to the frontend directory on the server
           rsync -avz --delete intranet/frontend/build/ root@162.241.149.204:/srv/intranet/frontend/
           
-          # Restart Nginx if necessary
+          # Optionally restart Nginx
           ssh -o StrictHostKeyChecking=no root@162.241.149.204 << 'EOF'
             systemctl restart nginx
           EOF
