@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const validator = require('validator'); // Import validator
-const bcrypt = require('bcryptjs'); // For hashing passwords
+const { hashValue, compareValue } = require('../utility/hashingUtils');
+
 
 const userSchema = new Schema({
   name: {
@@ -20,6 +21,11 @@ const userSchema = new Schema({
       message: 'Invalid email address'
     },
   },
+  linkedinAccount: {
+    type: Schema.Types.ObjectId,
+    ref: 'LinkedInUser', // Linking to LinkedIn user data
+  },
+
   password: {
     type: String,
     required: [true, 'Password is required'],
@@ -40,26 +46,22 @@ const userSchema = new Schema({
 
 // Pre-save hook to hash password before saving
 userSchema.pre('save', async function (next) {
-  // Check if the password is modified
-  if (!this.isModified('password')) {
-    return next();
-  }
-
   try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    if (this.isModified('password')) {
+      this.password = await hashValue(this.password); // Use utility function
+    }
     next();
   } catch (error) {
-    next(new Error(`Error hashing password: ${error.message}`)); // Custom error message
+    next(new Error(`Error hashing password: ${error.message}`));
   }
 });
 
 // Method to compare user-entered password with the hashed password in the DB
 userSchema.methods.matchPassword = async function (enteredPassword) {
   try {
-    return await bcrypt.compare(enteredPassword, this.password);
+    return await compareValue(enteredPassword, this.password); // Use utility function
   } catch (error) {
-    throw new Error(`Error comparing passwords: ${error.message}`); // Custom error message
+    throw new Error(`Error comparing passwords: ${error.message}`);
   }
 };
 

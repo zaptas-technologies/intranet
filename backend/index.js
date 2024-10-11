@@ -7,10 +7,9 @@ const userRoutes = require('./routes/auth');
 const linkedinRoutes = require('./routes/linkedinRoutes');
 const session = require('express-session');
 const cors = require('cors');
+const { startTokenRefreshJob } = require('./cronjob/refreshtoken');
 
 const app = express();
-
-
 
 app.use(cors());
 app.use(express.json());
@@ -22,11 +21,10 @@ app.use(session({
 }));
 
 
-
-
 // Define routes
-app.use('/', linkedinRoutes);
 app.use('/v1', userRoutes);
+app.use('/v1', linkedinRoutes);
+
 app.use('/v1/announcements', announcementRoutes);
 app.use('/v1/calendar', calendarRoutes);
 
@@ -40,5 +38,6 @@ const PORT = config.server.port;
 
 app.listen(PORT, async () => {
   await connect();
+  startTokenRefreshJob();
   console.log(`Server is running on port ${PORT}`);
 });

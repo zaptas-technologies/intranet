@@ -3,6 +3,9 @@ const jwksClient = require('jwks-rsa');
 const jwt = require('jsonwebtoken');
 const config = require('../../config/connect');
 const { sendResponse, purifyText, apiCall } = require('../../utility/responseHelper');
+const LinkedInUser = require('../../model/linkedinUserSchema');
+const { generateToken } = require('../../Middleware/jwtAuthorization');
+const User = require('../../model/user');
 
 
 const LINKEDIN_AUTH_URL = config.linkedin.LINKEDIN_AUTH_URL;
@@ -34,6 +37,7 @@ const LinkedInController = {
     }
 
     try {
+      // Exchange authorization code for access token and refresh token
       const tokenResponse = await apiCall(
         'POST',
         LINKEDIN_TOKEN_URL,
@@ -48,24 +52,92 @@ const LinkedInController = {
         res
       );
 
-      const { access_token, id_token } = tokenResponse;
+      const { access_token, refresh_token, expires_in, id_token } = tokenResponse;
 
-      if (!access_token || !id_token) {
-        throw new Error('Missing access token or ID token in response');
+      if (!access_token) {
+        throw new Error('Missing access token in response');
       }
 
+      // Verify and decode the ID token (LinkedIn user information)
       const decodedToken = await LinkedInController.verifyIdToken(id_token);
-      res.redirect(`http://162.241.149.204:3000?token=${access_token}`);
-      // return sendResponse(res, 200, true, 'Authentication successful', { user: decodedToken });
+      const { email, name, sub: linkedinId } = decodedToken;
 
+      // Check if a manual user already exists with the same email
+      let manualUser = await User.findOne({ email });
+
+      // If manual user exists, link LinkedIn account
+      if (manualUser) {
+
+        let linkedinUser = await LinkedInUser.findOne({ linkedinId });
+
+        // If LinkedIn user doesn't exist, create and link it
+        if (!linkedinUser || linkedinUser == null) {
+          linkedinUser = new LinkedInUser({
+            linkedinId,
+            linkedinEmail: email,
+            name,
+            accessToken: generateToken(access_token), // Save the raw access token, it will be hashed on save
+            refreshToken: generateToken(refresh_token), // Save the refresh token
+            tokenExpiry: new Date(Date.now() + expires_in * 1000),
+            manualUser: manualUser._id, // Link LinkedIn to manual user
+          });
+
+          await linkedinUser.save(); // The access token will be hashed in the pre-save hook
+
+          // Update manual user to reference LinkedIn account
+          manualUser.linkedinAccount = linkedinUser._id;
+          await manualUser.save();
+
+        }
+      } else {
+
+        manualUser = new User({
+          name,
+          email,
+          password: 'linkedin', // Generate a random password or prompt for one later
+          role: 'user', // Default role as 'user', adjust if needed
+        });
+        await manualUser.save();
+
+        let linkedinUser = await LinkedInUser.findOne({ linkedinId });
+        // If LinkedIn user doesn't exist, create and link it
+        if (!linkedinUser || linkedinUser == 'null') {
+          linkedinUser = new LinkedInUser({
+            linkedinId,
+            linkedinEmail: email,
+            name,
+            accessToken: generateToken(access_token), // Save the raw access token, it will be hashed on save
+            refreshToken: generateToken(refresh_token), // Save the refresh token
+            tokenExpiry: new Date(Date.now() + expires_in * 1000),
+            manualUser: manualUser._id, // Link LinkedIn to manual user
+          });
+          await linkedinUser.save()
+            .then(() => console.log('LinkedIn user saved successfully'))
+            .catch(error => {
+              console.error('Error saving LinkedIn user:', error.message);
+            });
+
+
+          manualUser.linkedinAccount = linkedinUser._id;
+          await manualUser.save();
+
+        }
+
+
+        // Redirect to the frontend with a success message or token if needed
+        res.redirect(`http://localhost:3060/fetch`);
+
+      }
     } catch (error) {
       const errorMessage = error.response?.data?.error_description || 'Error during token exchange';
       return sendResponse(res, error.response?.status || 500, false, 'Authentication failed', null, errorMessage);
     }
-  }, userInfo: async (req, res) => {
-    try {
-      const accessToken = req.headers.authorization.split(' ')[1]; // Get token from 'Authorization' header
+  },
 
+
+  userInfo: async (req, res) => {
+    try {
+      const accessToken = req?.accessToken
       // Define the LinkedIn user profile API endpoint
       const url = 'https://api.linkedin.com/v2/userinfo';
       // console.log(accessToken)
@@ -115,7 +187,7 @@ const LinkedInController = {
 
   fetchCompanyPosts: async (req, res) => {
     try {
-      const access_token = config.linkedin.access_token;
+      const access_token = req.accessToken
       const url = `${retrive_posts}?author=${encodeURIComponent(ZAPTAS_ORG_URN)}&q=author&count=10&sortBy=LAST_MODIFIED`;
 
       const headers = {
@@ -127,6 +199,7 @@ const LinkedInController = {
       const response = await apiCall('GET', url, headers, null, res);
 
       let structuredPosts = [];
+      console.log(response.elements[0])
       for (const post of response.elements) {
         structuredPosts.push({
           id: post.id,
@@ -160,33 +233,33 @@ const LinkedInController = {
   },
 
   likePost: async (req, res) => {
-    const { access_token, postId } = req.body;
-    const actor = 'urn:li:person:YOUR_PERSON_URN'; // Replace with actual person's URN
+    const postId = 'urn:li:share:7250408800510222337';
+
+    const access_token = req.accessToken
+
 
     try {
-      const url = 'https://api.linkedin.com/v2/reactions';
-      const headers = {
-        Authorization: `Bearer ${access_token}`,
-        'X-Restli-Protocol-Version': '2.0.0',
-        'Content-Type': 'application/json',
-      };
-
-      const data = {
-        actor: actor,
-        object: postId,
-        reactionType: 'LIKE',
-      };
+      const response = await axios.get(`https://api.linkedin.com/v2/socialActions/${encodeURIComponent(postId)}/likes`, {
+        headers: {
+          'Authorization': `Bearer ${access_token}`,
+          'X-Restli-Protocol-Version': '2.0.0',
+        },
+      });
+      console.log(response?.data)
+      return response.data;
 
       await apiCall('POST', url, headers, data, res);
       return sendResponse(res, 200, true, 'Post liked successfully');
 
     } catch (error) {
       // Error handling is already done in apiCall
+      return sendResponse(res, error.response?.status || 500, false, 'Like failed', null, error.response ? error.response.data : error.message);
     }
   },
 
   commentOnPost: async (req, res) => {
-    const { access_token, postId, comment } = req.body;
+    const { postId, comment } = req.body;
+    const access_token = req.accessToken
     const actor = 'urn:li:person:YOUR_PERSON_URN'; // Replace with actual person's URN
 
     try {

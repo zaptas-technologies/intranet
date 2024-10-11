@@ -14,19 +14,19 @@ const config = {
   linkedin: {
     clientId: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-    access_token:process.env.LINKEDIN_ACCESS_TOKEN,
-    ORGANIZATION_ID:process.env.LINKEDIN_ORGANIZATION_ID,
-    retrive_posts:"https://api.linkedin.com/rest/posts",
-    redirectUri: "http://162.241.149.204:3060/auth/linkedin/callback",
+    access_token: process.env.LINKEDIN_ACCESS_TOKEN,
+    ORGANIZATION_ID: process.env.LINKEDIN_ORGANIZATION_ID,
+    retrive_posts: "https://api.linkedin.com/rest/posts",
+    redirectUri: "http://localhost:3060/v1/auth/linkedin/callback",
     LINKEDIN_AUTH_URL: 'https://www.linkedin.com/oauth/v2/authorization',
     LINKEDIN_TOKEN_URL: 'https://www.linkedin.com/oauth/v2/accessToken',
     JWKS_URI: 'https://www.linkedin.com/oauth/openid/jwks',
-    REACT_APP_LINKEDIN_SCOPE:process.env.REACT_APP_LINKEDIN_SCOPE
+    REACT_APP_LINKEDIN_SCOPE: 'openid profile email w_member_social_feed r_organization_social_feed w_organization_social'
   },
-  corsOptions : {
+  corsOptions: {
     origin: 'http://162.241.149.204:3000',  // Allow your frontend's URL
-    credentials: true,                // Allow cookies and other credentials
-    optionsSuccessStatus: 200         // Some browsers (legacy) require success responses to be 200
+    credentials: true,                     // Allow cookies and other credentials
+    optionsSuccessStatus: 200             // Some browsers (legacy) require success responses to be 200
   }
 
 };
