@@ -67,11 +67,10 @@ const LinkedInController = {
 
       // If manual user exists, link LinkedIn account
       if (manualUser) {
-
         let linkedinUser = await LinkedInUser.findOne({ linkedinId });
 
         // If LinkedIn user doesn't exist, create and link it
-        if (!linkedinUser || linkedinUser == null) {
+        if (!linkedinUser) {
           linkedinUser = new LinkedInUser({
             linkedinId,
             linkedinEmail: email,
@@ -88,9 +87,24 @@ const LinkedInController = {
           manualUser.linkedinAccount = linkedinUser._id;
           await manualUser.save();
 
+          return sendResponse(res, 200, true, 'LinkedIn account linked successfully', { userId: manualUser._id });
         }
-      } else {
 
+        // If LinkedIn user exists, update the access and refresh tokens
+        linkedinUser.accessToken = generateToken(access_token); // Update access token
+        linkedinUser.refreshToken = generateToken(refresh_token); // Update refresh token
+        linkedinUser.tokenExpiry = new Date(Date.now() + expires_in * 1000); // Update token expiry
+
+        await linkedinUser.save(); // Save updated tokens
+
+        // Link to manual user if not already linked
+        manualUser.linkedinAccount = linkedinUser._id;
+        await manualUser.save();
+
+        return sendResponse(res, 200, true, 'LinkedIn account linked successfully and tokens updated', { userId: manualUser._id });
+
+      } else {
+        // Create a new manual user if not exists
         manualUser = new User({
           name,
           email,
@@ -100,8 +114,9 @@ const LinkedInController = {
         await manualUser.save();
 
         let linkedinUser = await LinkedInUser.findOne({ linkedinId });
+
         // If LinkedIn user doesn't exist, create and link it
-        if (!linkedinUser || linkedinUser == 'null') {
+        if (!linkedinUser) {
           linkedinUser = new LinkedInUser({
             linkedinId,
             linkedinEmail: email,
@@ -111,23 +126,31 @@ const LinkedInController = {
             tokenExpiry: new Date(Date.now() + expires_in * 1000),
             manualUser: manualUser._id, // Link LinkedIn to manual user
           });
-          await linkedinUser.save()
-            .then(() => console.log('LinkedIn user saved successfully'))
-            .catch(error => {
-              console.error('Error saving LinkedIn user:', error.message);
-            });
 
+          await linkedinUser.save();
+          manualUser.linkedinAccount = linkedinUser._id;
+          await manualUser.save();
+
+          return sendResponse(res, 201, true, 'User registered and LinkedIn account linked successfully', { userId: manualUser._id });
+        } else {
+          // If LinkedIn user exists, update the access and refresh tokens
+          linkedinUser.accessToken = generateToken(access_token); // Update access token
+          linkedinUser.refreshToken = generateToken(refresh_token); // Update refresh token
+          linkedinUser.tokenExpiry = new Date(Date.now() + expires_in * 1000); // Update token expiry
+
+          await linkedinUser.save(); // Save updated tokens
 
           manualUser.linkedinAccount = linkedinUser._id;
           await manualUser.save();
 
+          return sendResponse(res, 201, true, 'User registered and LinkedIn account linked successfully, tokens updated', { userId: manualUser._id });
         }
-
-
-        // Redirect to the frontend with a success message or token if needed
-        res.redirect(`http://localhost:3060/fetch`);
-
       }
+
+
+      // Redirect to the frontend with a success message or token if needed
+      res.redirect(`http://localhost:3060/fetch`);
+
     } catch (error) {
       const errorMessage = error.response?.data?.error_description || 'Error during token exchange';
       return sendResponse(res, error.response?.status || 500, false, 'Authentication failed', null, errorMessage);
@@ -189,7 +212,7 @@ const LinkedInController = {
     try {
       const access_token = req.accessToken
       const url = `${retrive_posts}?author=${encodeURIComponent(ZAPTAS_ORG_URN)}&q=author&count=10&sortBy=LAST_MODIFIED`;
-
+      console.log(access_token)
       const headers = {
         Authorization: `Bearer ${access_token}`,
         'Content-Type': 'application/json',
@@ -201,14 +224,20 @@ const LinkedInController = {
       let structuredPosts = [];
       console.log(response.elements[0])
       for (const post of response.elements) {
+        const likeCount = await LinkedInController.fetchLikesCount(post.id, access_token);
+        const comments = await LinkedInController.fetchComments(post.id, access_token);
+
         structuredPosts.push({
           id: post.id,
           commentary: purifyText(post.commentary),
+          author: post.author,
           publishedAt: post.publishedAt,
           visibility: post.visibility,
           imageUrl: post.content?.media?.id
             ? await LinkedInController.fetchImageUrl(post.content.media.id, access_token)
             : null,
+          likeCount,
+          comments
         });
       }
 
@@ -217,6 +246,51 @@ const LinkedInController = {
     } catch (error) {
       console.error('Failed to retrieve posts:', error.message);
       // Error handling is already done in apiCall
+    }
+  },
+  fetchLikesCount: async (postId, access_token) => {
+    const likesUrl = `https://api.linkedin.com/v2/socialActions/${postId}/likes`;
+    const headers = {
+      Authorization: `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+    };
+    try {
+      const response = await apiCall('GET', likesUrl, headers, null, null);
+      const totalLikes = response.paging.total; // Total likes count
+      const likers = response.elements.map(like => like.actor); // List of user URNs who liked the post
+
+      return {
+        totalLikes,
+        likers,
+      };
+    } catch (error) {
+      console.error('Failed to retrieve likes:', error.message);
+      return 0; // Return 0 if there was an error
+    }
+  },
+
+  // Function to fetch comments for a specific post
+  fetchComments: async (postId, access_token) => {
+    const commentsUrl = `https://api.linkedin.com/v2/socialActions/${postId}/comments`;
+    const headers = {
+      Authorization: `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
+    };
+
+    try {
+      const response = await apiCall('GET', commentsUrl, headers, null, null);
+      const comments = response.elements.map(comment => ({
+        id: comment.id,
+        actor: comment.actor,
+        message: comment.message.text,
+        createdAt: new Date(comment.created.time).toISOString(),
+        lastModifiedAt: new Date(comment.lastModified.time).toISOString(),
+      }));
+
+      return comments; // Return structured comments
+    } catch (error) {
+      console.error('Failed to retrieve comments:', error.message);
+      return []; // Return an empty array if there was an error
     }
   },
 
